@@ -79,7 +79,7 @@ function NavChip({
   return (
     <Link
       href={href}
-      className={`relative inline-flex items-center h-9 px-3.5 rounded-xl text-sm font-semibold transition-all duration-150 active:scale-[0.96] transition-transform ${
+      className={`relative inline-flex items-center h-9 px-3.5 rounded-xl text-sm font-semibold duration-150 active:scale-[0.96] transition-transform ${
         active ? "text-white" : "text-gray-1100 hover:text-gray-1200"
       }`}
       style={{

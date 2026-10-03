@@ -247,7 +247,7 @@ export default function StudentsPage() {
             <button
               onClick={handleRefresh}
               disabled={loading}
-              className="inline-flex items-center gap-2 px-4 h-11 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-1200 font-medium transition-colors active:scale-[0.96] disabled:opacity-60 disabled:active:scale-100 transition-transform duration-150 whitespace-nowrap"
+              className="inline-flex items-center gap-2 px-4 h-11 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-1200 font-medium active:scale-[0.96] disabled:opacity-60 disabled:active:scale-100 transition-transform duration-150 whitespace-nowrap"
               style={{ boxShadow: "var(--shadow-border)" }}
             >
               <svg
@@ -266,7 +266,7 @@ export default function StudentsPage() {
             </button>
             <Link
               href="/"
-              className="inline-flex items-center justify-center px-4 h-[44px] rounded-xl bg-gray-1200 hover:bg-gray-1100 active:bg-gray-1200 text-white font-semibold transition-colors active:scale-[0.96] transition-transform duration-150 whitespace-nowrap"
+              className="inline-flex items-center justify-center px-4 h-11 rounded-xl bg-gray-1200 hover:bg-gray-1100 active:bg-gray-1200 text-white font-semibold active:scale-[0.96] transition-transform duration-150 whitespace-nowrap"
               style={{
                 boxShadow:
                   "0 1px 2px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.06)",
@@ -301,7 +301,7 @@ export default function StudentsPage() {
               <button
                 key={opt.value}
                 onClick={() => setInstituteFilter(opt.value)}
-                className={`inline-flex items-center gap-2 h-9 px-3.5 rounded-xl text-sm font-medium transition-all duration-150 active:scale-[0.96] transition-colors whitespace-nowrap ${
+                className={`inline-flex items-center gap-2 h-9 px-3.5 rounded-xl text-sm font-medium transition-all duration-150 active:scale-[0.96] whitespace-nowrap ${
                   active ? "text-white" : "text-gray-1200 hover:bg-gray-200"
                 }`}
                 style={{
@@ -315,7 +315,7 @@ export default function StudentsPage() {
               >
                 {opt.label}
                 <span
-                  className={`inline-flex items-center justify-center text-[11px] font-semibold tabular-nums rounded-full h-5 min-w-[22px] px-1.5 ${
+                  className={`inline-flex items-center justify-center text-[11px] font-semibold tabular-nums rounded-full h-5 min-w-5.5 px-1.5 ${
                     active
                       ? "bg-white/18 text-white"
                       : "bg-gray-200 text-gray-1100"
