@@ -28,6 +28,11 @@ const C = {
 };
 
 const FONT = "inherit";
+const MONO = 'var(--font-mono), ui-monospace, "SF Mono", Menlo, monospace';
+
+// Column 0 is the Index column
+const fontFor = (id: number) => (id === 0 ? MONO : FONT);
+const sizeFor = (id: number) => (id === 0 ? "13px" : "14px");
 
 export class StringCell implements CellComponent {
   id: number;
@@ -43,8 +48,8 @@ export class StringCell implements CellComponent {
     this.el.style.padding = "0 18px";
     this.el.style.borderBottom = `1px solid ${C.rowBorder}`;
     this.el.style.color = C.text;
-    this.el.style.fontFamily = FONT;
-    this.el.style.fontSize = "14px";
+    this.el.style.fontFamily = fontFor(id);
+    this.el.style.fontSize = sizeFor(id);
     this.el.style.lineHeight = "43px";
     this.el.style.fontVariantNumeric = "tabular-nums";
     this.el.style.whiteSpace = "nowrap";
@@ -65,6 +70,8 @@ export class StringCell implements CellComponent {
   }
   reuse(id: number, offset: number, text: string | number) {
     this.id = id;
+    this.el.style.fontFamily = fontFor(id);
+    this.el.style.fontSize = sizeFor(id);
     this.setOffset(offset, true);
     this.setContent(text);
   }

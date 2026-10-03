@@ -231,7 +231,7 @@ export default function StudentsPage() {
               </svg>
               Back to registration
             </Link>
-            <h1 className="text-2xl tracking-tighter sm:text-3xl font-bold text-gray-1200 text-wrap-balance leading-tight">
+            <h1 className="text-2xl tracking-tighter sm:text-3xl font-medium text-gray-1200 text-wrap-balance leading-tight">
               Student Database
             </h1>
             <p className="mt-2 text-text-paragraph text-sm sm:text-base leading-relaxed text-wrap-pretty">
