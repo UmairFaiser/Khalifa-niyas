@@ -247,7 +247,7 @@ export default function StudentsPage() {
             <button
               onClick={handleRefresh}
               disabled={loading}
-              className="inline-flex items-center gap-2 px-4 h-11 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-1200 font-medium active:scale-[0.96] disabled:opacity-60 disabled:active:scale-100 transition-transform duration-150 whitespace-nowrap"
+              className="inline-flex items-center gap-2 px-4 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-1200 font-medium active:scale-[0.96] disabled:opacity-60 disabled:active:scale-100 transition-transform duration-150 whitespace-nowrap"
               style={{ boxShadow: "var(--shadow-border)" }}
             >
               <svg
@@ -262,11 +262,10 @@ export default function StudentsPage() {
                 <path d="M21 12a9 9 0 1 1-3-6.7" />
                 <path d="M21 3v6h-6" />
               </svg>
-              {loading ? "Loading…" : "Refresh"}
             </button>
             <Link
               href="/"
-              className="inline-flex items-center justify-center px-4 h-11 rounded-xl bg-gray-1200 hover:bg-gray-1100 active:bg-gray-1200 text-white font-semibold active:scale-[0.96] transition-transform duration-150 whitespace-nowrap"
+              className="inline-flex items-center justify-center px-4 h-10 rounded-full bg-gray-1200 hover-hover:hover:not-disabled:bg-gray-800 active:bg-gray-1200 text-gray-200 font-medium active:scale-[0.96] tracking-tight transition-colors duration-150 whitespace-nowrap"
               style={{
                 boxShadow:
                   "0 1px 2px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.06)",
@@ -301,7 +300,7 @@ export default function StudentsPage() {
               <button
                 key={opt.value}
                 onClick={() => setInstituteFilter(opt.value)}
-                className={`inline-flex items-center gap-2 h-9 px-3.5 rounded-xl text-sm font-medium transition-all duration-150 active:scale-[0.96] whitespace-nowrap ${
+                className={`inline-flex items-center gap-2 h-9 px-3.5 rounded-lg text-sm font-medium transition-all duration-150 active:scale-[0.96] whitespace-nowrap ${
                   active ? "text-white" : "text-gray-1200 hover:bg-gray-200"
                 }`}
                 style={{
@@ -337,10 +336,8 @@ export default function StudentsPage() {
         >
           {error ? (
             <div
-              className="p-6 sm:p-8 rounded-2xl m-4 text-center"
+              className="p-6 sm:p-8 m-4 text-center"
               style={{
-                backgroundColor: "oklch(0.975 0.03 25)",
-                boxShadow: "inset 0 0 0 1px oklch(0.6 0.22 27 / 0.22)",
               }}
             >
               <p className="font-semibold text-red-700 mb-1">

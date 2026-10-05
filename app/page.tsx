@@ -116,7 +116,7 @@ export default function Home() {
     "focus:[box-shadow:0_0_0_2px_oklch(0.55_0.22_27_/_0.35),0_0_0_1px_oklch(0.55_0.22_27_/_0.6)]";
 
   const buttonBase =
-    "w-full py-3.5 rounded-xl font-semibold transition-transform duration-150 " +
+    "w-full py-3.5 rounded-xl font-medium transition-transform duration-150 " +
     "active:scale-[0.96] disabled:active:scale-100 " +
     "transition-colors duration-200 min-h-[52px] flex items-center justify-center gap-2";
 
@@ -195,7 +195,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md rounded-xl">
         <div
           className="text-center mb-8 animate-[fadeInUp_0.4s_cubic-bezier(0.2,0,0,1)_both]"
           style={{ animationFillMode: "both" }}
@@ -210,7 +210,7 @@ export default function Home() {
 
         <form
           onSubmit={handleSubmit}
-          className="bg-preview-bg p-6 sm:p-8 space-y-5 animate-[fadeInUp_0.4s_cubic-bezier(0.2,0,0,1)_0.05s_both] [box-shadow:var(--shadow-custom)] hover:[box-shadow:var(--shadow-custom-hover)] transition-shadow duration-300"
+          className="bg-preview-bg rounded-xl p-6 sm:p-8 space-y-5 animate-[fadeInUp_0.4s_cubic-bezier(0.2,0,0,1)_0.05s_both] [box-shadow:var(--shadow-custom)] hover:[box-shadow:var(--shadow-custom-hover)] transition-shadow duration-300"
           style={{ animationFillMode: "both" }}
         >
           <div className="animate-[fadeInUp_0.3s_cubic-bezier(0.2,0,0,1)_0.12s_both]" style={{ animationFillMode: "both" }}>
@@ -222,8 +222,8 @@ export default function Home() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Khalifa Niyas"
-              className={`${inputBase} ${errors.name ? errorInput : ""} h-2`}
+              placeholder="Khalifa Niyas"
+              className={`${inputBase} ${errors.name ? errorInput : ""}`}
               autoComplete="name"
               disabled={formState === "submitting"}
             />
@@ -241,7 +241,7 @@ export default function Home() {
               type="tel"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder="e.g. 0771234567"
+              placeholder="0771234567"
               className={`${inputBase} tabular-nums ${errors.phoneNumber ? errorInput : ""}`}
               autoComplete="tel"
               inputMode="numeric"
@@ -251,7 +251,7 @@ export default function Home() {
               <p className="mt-2.5 text-sm text-red-600 leading-snug">{errors.phoneNumber}</p>
             ) : (
               <p className="mt-2.5 text-xs text-gray-1000 leading-relaxed text-wrap-pretty">
-                Used to add you to the WhatsApp class group. 10 digits starting with 07.
+                Used to add you to the Whatsapp class group. starting with 07.
               </p>
             )}
           </div>
