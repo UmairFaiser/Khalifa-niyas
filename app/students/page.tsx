@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 import { Grid, type Rows, type Row } from "@/lib/fast-grid";
+import { Skeleton } from "boneyard-js/react";
 
 type StudentRow = {
   id: string;
@@ -234,13 +235,13 @@ export default function StudentsPage() {
             <h1 className="text-2xl tracking-tighter sm:text-3xl font-medium text-gray-1200 text-wrap-balance leading-tight">
               Student Database
             </h1>
-            <p className="mt-2 text-text-paragraph text-sm sm:text-base leading-relaxed text-wrap-pretty">
-              {loading
-                ? "Loading students…"
-                : error
+            <Skeleton name="Description-text" loading={loading}>
+              <p className="mt-2 text-text-paragraph text-sm sm:text-base leading-relaxed text-wrap-pretty">
+                {error
                   ? "Could not load records."
                   : `${total.toLocaleString()} students registered across 5 institutes.`}
-            </p>
+              </p>
+            </Skeleton>
           </div>
 
           <div className="flex items-center gap-2">
@@ -280,10 +281,7 @@ export default function StudentsPage() {
           className="mb-4 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between animate-[fadeInUp_0.4s_cubic-bezier(0.2,0,0,1)_0.05s_both]"
           style={{ animationFillMode: "both" }}
         >
-          <div className="relative flex-1 max-w-xl">
-            
-            
-          </div>
+          <div className="relative flex-1 max-w-xl"></div>
         </div>
 
         <div
@@ -335,11 +333,7 @@ export default function StudentsPage() {
           }}
         >
           {error ? (
-            <div
-              className="p-6 sm:p-8 m-4 text-center"
-              style={{
-              }}
-            >
+            <div className="p-6 sm:p-8 m-4 text-center" style={{}}>
               <p className="font-semibold text-red-700 mb-1">
                 Failed to load students
               </p>

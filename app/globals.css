@@ -3,6 +3,11 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* Light theme defaults — applied to the whole page via :root */
+
+.root {
+  isolation: isolate;
+}
+
 :root {
   --color-gray-background: oklch(0.99 0 0);
   --color-gray-100: oklch(0.99 0 0);
@@ -20,6 +25,7 @@
   --color-preview-bg: oklch(1 0 0);
   --color-preview-border: oklch(0.93 0 0);
   --color-text-paragraph: oklch(0.38 0 0);
+  --color-focus-ring: oklch(0.85 0.15 260 / 0.8);
   --color-border-overlay: oklch(0 0 0 / 0.1);
   --shadow-border: 0px 0px 0px 1px oklch(0 0 0 / 0.06);
   --shadow-custom:
@@ -133,6 +139,7 @@
   --shadow-custom-active: var(--shadow-custom-active);
   --font-sans: var(--font-inter);
   --font-mono: var(--font-departure-mono);
+  --color-focus-ring: var(--color-focus-ring);
 }
 
 body {

@@ -1,0 +1,95 @@
+{
+  "breakpoints": {
+    "375": {
+      "name": "students-description",
+      "viewportWidth": 295,
+      "width": 295,
+      "height": 23,
+      "bones": [
+        [
+          0,
+          0,
+          100,
+          23,
+          8
+        ]
+      ]
+    },
+    "640": {
+      "name": "students-description",
+      "viewportWidth": 338,
+      "width": 338,
+      "height": 26,
+      "bones": [
+        [
+          0,
+          0,
+          100,
+          26,
+          8
+        ]
+      ]
+    },
+    "768": {
+      "name": "students-description",
+      "viewportWidth": 338,
+      "width": 338,
+      "height": 26,
+      "bones": [
+        [
+          0,
+          0,
+          100,
+          26,
+          8
+        ]
+      ]
+    },
+    "1024": {
+      "name": "students-description",
+      "viewportWidth": 338,
+      "width": 338,
+      "height": 26,
+      "bones": [
+        [
+          0,
+          0,
+          100,
+          26,
+          8
+        ]
+      ]
+    },
+    "1280": {
+      "name": "students-description",
+      "viewportWidth": 338,
+      "width": 338,
+      "height": 26,
+      "bones": [
+        [
+          0,
+          0,
+          100,
+          26,
+          8
+        ]
+      ]
+    },
+    "1536": {
+      "name": "students-description",
+      "viewportWidth": 338,
+      "width": 338,
+      "height": 26,
+      "bones": [
+        [
+          0,
+          0,
+          100,
+          26,
+          8
+        ]
+      ]
+    }
+  },
+  "_hash": "a60400c3b6ed98e03c85ba42caed3062"
+}

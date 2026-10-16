@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { SiteNav } from "@/components/site-nav";
 
 type Institute = "maxicon" | "sigma" | "sasik" | "farade" | "online";
 
@@ -116,7 +115,7 @@ export default function Home() {
     "focus:[box-shadow:0_0_0_2px_oklch(0.55_0.22_27_/_0.35),0_0_0_1px_oklch(0.55_0.22_27_/_0.6)]";
 
   const buttonBase =
-    "w-full py-3.5 rounded-xl font-medium transition-transform duration-150 " +
+    "w-full py-3.5 rounded-full cursor-pointer font-medium transition-transform duration-150 " +
     "active:scale-[0.96] disabled:active:scale-100 " +
     "transition-colors duration-200 min-h-[52px] flex items-center justify-center gap-2";
 
