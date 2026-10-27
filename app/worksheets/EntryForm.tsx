@@ -9,7 +9,7 @@ const INSTITUTES = ['maxicon', 'sigma', 'sasik', 'farade', 'online']
 
 const field =
   'h-10 rounded-full border border-[var(--color-gray-300)] bg-[var(--color-gray-background)] px-4 text-sm text-[var(--color-gray-1200)] outline-none focus:border-[var(--color-gray-600)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]'
-const label = 'text-xs text-[var(--color-gray-900)]'
+const label = 'text-sm text-gray-900'
 
 export default function EntryForm() {
   const [worksheet, setWorksheet] = useState('')
@@ -144,7 +144,7 @@ export default function EntryForm() {
 
   return (
     <form onSubmit={submit} className="mx-auto my-auto flex w-full max-w-md flex-col gap-3 p-6">
-      <label className={label}>Worksheet number</label>
+      <label className={`${label}`}>Worksheet number</label>
       <input
         className={field}
         inputMode="numeric"
@@ -224,7 +224,7 @@ export default function EntryForm() {
 
           <label className={label}>Institute</label>
           <select
-            className={field}
+            className={`${field}`}
             value={institute}
             onChange={e => setInstitute(e.target.value)}
           >
@@ -259,7 +259,7 @@ export default function EntryForm() {
       <button
         type="submit"
         disabled={pending || !canSubmit}
-        className="mt-2 h-10 rounded-full bg-gray-1200 text-sm text-gray-background disabled:opacity-40"
+        className="mt-2 h-10 rounded-full bg-gray-1200 text-sm text-gray-background disabled:opacity-40 transition-transform duration-200 ease-out active:scale-[0.97] cursor-pointer"
       >
         {pending ? 'Saving…' : isNew ? 'Add student & save marks' : 'Save marks'}
       </button>

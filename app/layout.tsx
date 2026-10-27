@@ -27,7 +27,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${inter.variable} ${departuremono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col root">
+      <body className="min-h-full flex flex-col root bg-gray-background">
         {children}
         <SpeedInsights />
       </body>
