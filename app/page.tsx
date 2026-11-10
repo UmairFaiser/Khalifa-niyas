@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Link from "next/link";
+import { toast } from "sonner";
 import { createClient } from "@/utils/supabase/client";
 
 type Institute = "maxicon" | "sigma" | "sasik" | "farade" | "online";
@@ -56,7 +58,6 @@ export default function Home() {
   const [formState, setFormState] = useState<FormState>("form");
   const [indexNumber, setIndexNumber] = useState("");
   const [studentName, setStudentName] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
 
   const isSubmitting = formState === "submitting";
 
@@ -85,7 +86,6 @@ export default function Home() {
     if (!validate()) return;
 
     setFormState("submitting");
-    setErrorMessage("");
 
     try {
       const { data, error } = await supabase
@@ -105,11 +105,14 @@ export default function Home() {
       setFormState("success");
     } catch (err: any) {
       console.error("Submission error:", err);
-      setErrorMessage(
-        err?.message ||
-          "Something went wrong. Check your connection and try again.",
-      );
       setFormState("error");
+      toast.error(
+        `${
+          err?.message ||
+          "Something went wrong. Check your connection and try again."
+        } Your details are still here, so you can try again.`,
+        { duration: 6000 },
+      );
     }
   };
 
@@ -117,7 +120,6 @@ export default function Home() {
     setFormState("form");
     setIndexNumber("");
     setStudentName("");
-    setErrorMessage("");
     setErrors({});
     setName("");
     setPhoneNumber("");
@@ -146,7 +148,7 @@ export default function Home() {
             <p className="text-sm font-medium text-gray-1100 mb-2">
               Index number
             </p>
-            <p className="font-mono text-5xl font-bold text-gray-1200 tabular-nums leading-none select-all">
+            <p className="text-5xl font-bold text-gray-1200 tabular-nums leading-none select-all">
               {indexNumber}
             </p>
           </div>
@@ -169,7 +171,7 @@ export default function Home() {
             type="button"
             onClick={resetForm}
             autoFocus
-            className={`${buttonBase} mt-5 bg-gray-1200 hover:bg-gray-1100 text-white`}
+            className={`${buttonBase} mt-5 bg-gray-1200 text-gray-background hover:bg-gray-1100`}
             style={{
               boxShadow:
                 "0 1px 2px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.06)",
@@ -186,8 +188,8 @@ export default function Home() {
 
   return (
     <main className="min-h-dvh flex flex-col items-center justify-center px-5">
-      <h1 className="text-4xl tracking-tighter mb-10 font-[450] text-center text-gray-1200">
-        Student registration
+      <h1 className="text-4xl tracking-tighter mb-10 font-[450] text-center text-gray-1200 [word-spacing:0.15em]">
+        Student Registration
       </h1>
       <form
         onSubmit={handleSubmit}
@@ -205,7 +207,7 @@ export default function Home() {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Khalifa Niyas"
+            placeholder="Enter full name"
             autoComplete="name"
             disabled={isSubmitting}
             aria-invalid={!!errors.name}
@@ -230,7 +232,7 @@ export default function Home() {
             inputMode="numeric"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
-            placeholder="0771234567"
+            placeholder="Enter phone number"
             autoComplete="tel"
             disabled={isSubmitting}
             aria-invalid={!!errors.phoneNumber}
@@ -264,9 +266,9 @@ export default function Home() {
                     "block cursor-pointer select-none rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-1200 " +
                     "[box-shadow:var(--shadow-border)] " +
                     "transition-[transform,background-color,color] duration-150 " +
-                    "hover:bg-gray-200 active:scale-[0.96] " +
-                    "peer-checked:bg-gray-1200 peer-checked:text-white peer-checked:[box-shadow:none] " +
-                    "peer-focus-visible:ring-2 peer-focus-visible:ring-gray-1200/30 peer-focus-visible:ring-offset-2 " +
+                    "active:scale-[0.96] " +
+                    "peer-checked:bg-gray-1200 peer-checked:text-gray-background peer-checked:[box-shadow:none] " +
+                    "peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--color-focus-ring)] peer-focus-visible:ring-offset-2 " +
                     "peer-disabled:opacity-60 peer-disabled:cursor-not-allowed"
                   }
                 >
@@ -278,31 +280,11 @@ export default function Home() {
           {errors.institute && <p className={fieldError}>{errors.institute}</p>}
         </fieldset>
 
-        {/* Submission error */}
-        {formState === "error" && (
-          <div
-            role="alert"
-            className="rounded-2xl px-4 py-3"
-            style={{
-              backgroundColor: "oklch(0.975 0.03 25)",
-              boxShadow:
-                "inset 0 0 0 1px oklch(0.6 0.22 27 / 0.22), 0 1px 2px oklch(0.6 0.22 27 / 0.05)",
-            }}
-          >
-            <p className="text-sm font-semibold text-red-700">
-              Registration didn&rsquo;t go through
-            </p>
-            <p className="mt-0.5 text-sm text-red-600 leading-snug">
-              {errorMessage} Your details are still here, so you can try again.
-            </p>
-          </div>
-        )}
-
         {/* Submit */}
         <button
           type="submit"
           disabled={isSubmitting}
-          className={`${buttonBase} bg-gray-1200 hover:bg-gray-1100 text-white disabled:opacity-60`}
+          className={`${buttonBase} bg-gray-1200 text-gray-background disabled:opacity-60`}
           style={{
             boxShadow:
               "0 1px 2px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.06)",
@@ -310,6 +292,12 @@ export default function Home() {
         >
           {isSubmitting ? "Registering…" : "Register"}
         </button>
+        <p className="text-center text-sm text-gray-1100">
+          Already have an index number?{" "}
+          <Link href="/details" className="font-medium text-gray-1200 underline">
+            Add your school
+          </Link>
+        </p>
       </form>
     </main>
   );

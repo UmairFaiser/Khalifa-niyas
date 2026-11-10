@@ -9,6 +9,11 @@
 }
 
 :root {
+  --color-syntax-keyword: oklch(0.52 0.19 305);
+  --color-syntax-column: oklch(0.5 0.14 250);
+  --color-syntax-table: oklch(0.55 0.12 195);
+  --color-syntax-string: oklch(0.5 0.14 150);
+  --color-syntax-number: oklch(0.58 0.16 55);
   --color-gray-background: oklch(0.99 0 0);
   --color-gray-100: oklch(0.99 0 0);
   --color-gray-200: oklch(0.97 0 0);
@@ -64,6 +69,11 @@
 
 /* Dark theme overrides — toggled by adding .dark to <html> */
 .dark {
+  --color-syntax-keyword: oklch(0.78 0.13 305);
+  --color-syntax-column: oklch(0.78 0.11 250);
+  --color-syntax-table: oklch(0.8 0.1 195);
+  --color-syntax-string: oklch(0.8 0.13 150);
+  --color-syntax-number: oklch(0.8 0.13 60);
   --color-gray-background: oklch(0.17 0 0);
   --color-gray-100: oklch(0.18 0 0);
   --color-gray-200: oklch(0.21 0 0);
@@ -116,6 +126,11 @@
   so toggling .dark automatically updates bg-gray-*, shadow-custom, etc.
 */
 @theme inline {
+  --color-syntax-keyword: var(--color-syntax-keyword);
+  --color-syntax-column: var(--color-syntax-column);
+  --color-syntax-table: var(--color-syntax-table);
+  --color-syntax-string: var(--color-syntax-string);
+  --color-syntax-number: var(--color-syntax-number);
   --color-gray-background: var(--color-gray-background);
   --color-gray-100: var(--color-gray-100);
   --color-gray-200: var(--color-gray-200);
@@ -160,6 +175,25 @@ body {
     background: oklch(0.85 0.15 260 / 0.4);
     color: var(--color-gray-1200);
   }
+}
+
+.filter-cell-input {
+  background-color: var(--color-gray-200);
+  color: var(--color-gray-1200);
+  caret-color: var(--color-gray-1200);
+  -webkit-text-fill-color: var(--color-gray-1200);
+}
+
+.filter-cell-input::placeholder {
+  color: var(--color-gray-900);
+  -webkit-text-fill-color: var(--color-gray-900);
+  opacity: 1;
+}
+
+.filter-cell-input:focus {
+  background-color: var(--color-gray-200);
+  color: var(--color-gray-1200);
+  -webkit-text-fill-color: var(--color-gray-1200);
 }
 
 @keyframes fadeInUp {

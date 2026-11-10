@@ -5,12 +5,14 @@ import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 import { Grid, type Rows, type Row } from "@/lib/fast-grid";
 import { Skeleton } from "boneyard-js/react";
+import { toast } from "sonner";
 
 type StudentRow = {
   id: string;
   index_number: string;
   name: string;
   phone_number: string;
+  school: string | null;
   institute: "maxicon" | "sigma" | "sasik" | "farade" | "online";
   created_at: string;
 };
@@ -31,7 +33,14 @@ const INSTITUTE_OPTIONS = [
   { value: "online", label: "Online", prefix: "ON" },
 ] as const;
 
-const HEADERS = ["Index", "Name", "Phone Number", "Institute", "Registered"];
+const HEADERS = [
+  "Index",
+  "Name",
+  "Phone Number",
+  "School",
+  "Institute",
+  "Registered",
+];
 
 const formatDate = (iso: string) => {
   const d = new Date(iso);
@@ -52,8 +61,9 @@ const studentsToRows = (students: StudentRow[]): Rows => {
           { id: 0, v: s.index_number },
           { id: 1, v: s.name },
           { id: 2, v: s.phone_number },
-          { id: 3, v: INSTITUTE_LABEL[s.institute] },
-          { id: 4, v: formatDate(s.created_at) },
+          { id: 3, v: s.school?.trim() ? s.school : "—" },
+          { id: 4, v: INSTITUTE_LABEL[s.institute] },
+          { id: 5, v: formatDate(s.created_at) },
         ],
       }) satisfies Row,
   );
@@ -102,7 +112,7 @@ export default function StudentsPage() {
       }
     }
     if (instituteFilter !== "all") {
-      view.filter[3] =
+      view.filter[4] =
         INSTITUTE_LABEL[instituteFilter as StudentRow["institute"]];
     }
     gridRef.current.rowManager.runFilter();
@@ -132,7 +142,9 @@ export default function StudentsPage() {
       try {
         const { data, error: e } = await supabase
           .from("students")
-          .select("id,index_number,name,phone_number,institute,created_at")
+          .select(
+            "id,index_number,name,phone_number,school,institute,created_at",
+          )
           .order("created_at", { ascending: false });
         if (e) throw e;
         if (cancelled) return;
@@ -186,7 +198,9 @@ export default function StudentsPage() {
     try {
       const { data, error: e } = await supabase
         .from("students")
-        .select("id,index_number,name,phone_number,institute,created_at")
+        .select(
+          "id,index_number,name,phone_number,school,institute,created_at",
+        )
         .order("created_at", { ascending: false });
       if (e) throw e;
       const rows = (data as StudentRow[]) ?? [];
@@ -201,7 +215,7 @@ export default function StudentsPage() {
       applyFilters();
       setVisibleCount(rows.length);
     } catch (err: any) {
-      setError(err?.message || "Failed to refresh");
+      toast.error(err?.message || "Failed to refresh");
     } finally {
       setLoading(false);
     }
@@ -215,33 +229,10 @@ export default function StudentsPage() {
           style={{ animationFillMode: "both" }}
         >
           <div className="min-w-0">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 text-sm text-gray-1100 hover:text-gray-1200 transition-colors mb-3 group"
-            >
-              <svg
-                className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-0.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2.2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
-              Back to registration
-            </Link>
-            <h1 className="text-2xl tracking-tighter sm:text-3xl font-medium text-gray-1200 text-wrap-balance leading-tight">
-              Student Database
+            
+            <h1 className="text-2xl tracking-tighter sm:text-3xl font-medium text-gray-1200 text-wrap-balance leading-tight [word-spacing:0.15em]">
+              Student Database <span className="font-mono [word-spacing:-0.35em]">2027 A/L</span>
             </h1>
-            <Skeleton name="Description-text" loading={loading}>
-              <p className="mt-2 text-text-paragraph text-sm sm:text-base leading-relaxed text-wrap-pretty">
-                {error
-                  ? "Could not load records."
-                  : `${total.toLocaleString()} students registered across 5 institutes.`}
-              </p>
-            </Skeleton>
           </div>
 
           <div className="flex items-center gap-2">
@@ -265,14 +256,11 @@ export default function StudentsPage() {
               </svg>
             </button>
             <Link
-              href="/"
-              className="inline-flex items-center justify-center px-4 h-10 rounded-full bg-gray-1200 hover-hover:hover:not-disabled:bg-gray-800 active:bg-gray-1200 text-gray-200 font-medium active:scale-[0.96] tracking-tight transition-colors duration-150 whitespace-nowrap"
-              style={{
-                boxShadow:
-                  "0 1px 2px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.06)",
-              }}
+              href="/details"
+              className="inline-flex items-center justify-center px-4 h-10 rounded-full bg-gray-100 text-gray-1200 font-medium active:scale-[0.96] tracking-tight transition-colors duration-150 whitespace-nowrap hover:bg-gray-200"
+              style={{ boxShadow: "var(--shadow-border)" }}
             >
-              + New Registration
+              Student details
             </Link>
           </div>
         </div>
@@ -298,13 +286,12 @@ export default function StudentsPage() {
               <button
                 key={opt.value}
                 onClick={() => setInstituteFilter(opt.value)}
-                className={`inline-flex items-center gap-2 h-9 px-3.5 rounded-lg text-sm font-medium transition-all duration-150 active:scale-[0.96] whitespace-nowrap ${
-                  active ? "text-white" : "text-gray-1200 hover:bg-gray-200"
+                className={`inline-flex items-center gap-2 h-9 px-3.5 rounded-lg text-sm font-medium transition-[transform,background-color,color] duration-150 active:scale-[0.96] whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
+                  active
+                    ? "bg-gray-1200 text-gray-background"
+                    : "bg-gray-100 text-gray-1200 hover:bg-gray-200"
                 }`}
                 style={{
-                  backgroundColor: active
-                    ? "var(--color-gray-1200)"
-                    : "var(--color-gray-100)",
                   boxShadow: active
                     ? "0 1px 2px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.06)"
                     : "var(--shadow-border)",
@@ -314,7 +301,7 @@ export default function StudentsPage() {
                 <span
                   className={`inline-flex items-center justify-center text-[11px] font-semibold tabular-nums rounded-full h-5 min-w-5.5 px-1.5 ${
                     active
-                      ? "bg-white/18 text-white"
+                      ? "bg-gray-background/18 text-gray-background"
                       : "bg-gray-200 text-gray-1100"
                   }`}
                 >

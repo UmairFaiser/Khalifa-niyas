@@ -23,15 +23,13 @@ const C = {
   headBg: "var(--color-gray-100)",
   surface: "var(--color-preview-bg)",
   hover: "var(--color-gray-300)",
-  accent: "oklch(0.62 0.17 240)",
-  accentRing: "oklch(0.62 0.17 240 / 0.18)",
+  accent: "var(--color-gray-1200)",
+  accentRing: "var(--color-focus-ring)",
 };
 
 const FONT = "inherit";
-const MONO = 'var(--font-mono), ui-monospace, "SF Mono", Menlo, monospace';
 
 // Column 0 is the Index column
-const fontFor = (id: number) => (id === 0 ? MONO : FONT);
 const sizeFor = (id: number) => (id === 0 ? "13px" : "14px");
 
 export class StringCell implements CellComponent {
@@ -48,7 +46,6 @@ export class StringCell implements CellComponent {
     this.el.style.padding = "0 18px";
     this.el.style.borderBottom = `1px solid ${C.rowBorder}`;
     this.el.style.color = C.text;
-    this.el.style.fontFamily = fontFor(id);
     this.el.style.fontSize = sizeFor(id);
     this.el.style.lineHeight = "43px";
     this.el.style.fontVariantNumeric = "tabular-nums";
@@ -70,7 +67,6 @@ export class StringCell implements CellComponent {
   }
   reuse(id: number, offset: number, text: string | number) {
     this.id = id;
-    this.el.style.fontFamily = fontFor(id);
     this.el.style.fontSize = sizeFor(id);
     this.setOffset(offset, true);
     this.setContent(text);
@@ -166,13 +162,17 @@ export class FilterCell implements CellComponent {
     this.input.style.fontVariantNumeric = "tabular-nums";
     this.input.style.padding = "0 12px";
     this.input.style.borderRadius = "999px";
-    this.input.style.backgroundColor = C.surface;
-    this.input.style.color = C.text;
+    this.input.className = "filter-cell-input";
+    this.input.style.backgroundColor = "var(--color-gray-200)";
+    this.input.style.color = "var(--color-gray-1200)";
+    this.input.style.caretColor = "var(--color-gray-1200)";
     this.input.style.boxShadow = "var(--shadow-border)";
     this.input.style.transition = "box-shadow 150ms";
     this.input.addEventListener("input", this.onInputChange);
     this.input.addEventListener("focus", () => {
-      this.input.style.boxShadow = `0 0 0 1px ${C.accent}, 0 0 0 4px ${C.accentRing}`;
+      this.input.style.boxShadow = `0 0 0 1px var(--color-gray-1200), 0 0 0 4px ${C.accentRing}`;
+      this.input.style.backgroundColor = "var(--color-gray-200)";
+      this.input.style.color = "var(--color-gray-1200)";
     });
     this.input.addEventListener("blur", () => {
       this.input.style.boxShadow = "var(--shadow-border)";

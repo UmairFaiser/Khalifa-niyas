@@ -59,6 +59,12 @@ export function SiteNav() {
           <NavChip href="/students" exact active={pathname === "/students"}>
             Students
           </NavChip>
+          <NavChip href="/details" exact active={pathname === "/details"}>
+            Details
+          </NavChip>
+          <NavChip href="/details" exact active={pathname === "/details"}>
+            Details
+          </NavChip>
         </div>
       </nav>
     </header>
@@ -80,7 +86,9 @@ function NavChip({
     <Link
       href={href}
       className={`relative inline-flex items-center h-9 px-3.5 rounded-xl text-sm font-semibold duration-150 active:scale-[0.96] transition-transform ${
-        active ? "text-white" : "text-gray-1100 hover:text-gray-1200"
+        active
+          ? "text-gray-background"
+          : "text-gray-1100 hover:text-gray-1200"
       }`}
       style={{
         backgroundColor: active ? "var(--color-gray-1200)" : "transparent",
