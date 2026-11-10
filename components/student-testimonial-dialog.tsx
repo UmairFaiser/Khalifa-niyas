@@ -214,7 +214,7 @@ export function StudentTestimonialDialog({
 
         <Dialog.Popup
           aria-labelledby="testimonial-title"
-          className="fixed left-1/2 top-1/2 z-50 flex max-h-[min(86dvh,760px)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-gray-400 bg-gray-100 outline-none shadow-shadow-custom transition-[opacity,transform] duration-200 data-starting-style:translate-y-[calc(-50%+8px)] data-starting-style:opacity-0 data-ending-style:opacity-0"
+          className="fixed left-1/2 top-1/2 z-50 flex max-h-[min(86dvh,760px)] w-[calc(100%-2rem)] max-w-4xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl border border-gray-400 bg-gray-100 outline-none shadow-shadow-custom transition-[opacity,transform] duration-200 data-starting-style:translate-y-[calc(-50%+8px)] data-starting-style:opacity-0 data-ending-style:opacity-0"
         >
           <header className="flex shrink-0 items-start justify-between gap-4 border-b border-gray-400 px-5 py-4 sm:px-7">
             <div>
