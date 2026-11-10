@@ -198,9 +198,7 @@ export default function StudentsPage() {
     try {
       const { data, error: e } = await supabase
         .from("students")
-        .select(
-          "id,index_number,name,phone_number,school,institute,created_at",
-        )
+        .select("id,index_number,name,phone_number,school,institute,created_at")
         .order("created_at", { ascending: false });
       if (e) throw e;
       const rows = (data as StudentRow[]) ?? [];
@@ -229,39 +227,10 @@ export default function StudentsPage() {
           style={{ animationFillMode: "both" }}
         >
           <div className="min-w-0">
-            
             <h1 className="text-2xl tracking-tighter sm:text-3xl font-medium text-gray-1200 text-wrap-balance leading-tight [word-spacing:0.15em]">
-              Student Database <span className="font-mono [word-spacing:-0.35em]">2027 A/L</span>
+              Student Database{" "}
+              <span className="font-mono [word-spacing:-0.35em]">2027 A/L</span>
             </h1>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleRefresh}
-              disabled={loading}
-              className="inline-flex items-center gap-2 px-4 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-1200 font-medium active:scale-[0.96] disabled:opacity-60 disabled:active:scale-100 transition-transform duration-150 whitespace-nowrap"
-              style={{ boxShadow: "var(--shadow-border)" }}
-            >
-              <svg
-                className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2.2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M21 12a9 9 0 1 1-3-6.7" />
-                <path d="M21 3v6h-6" />
-              </svg>
-            </button>
-            <Link
-              href="/details"
-              className="inline-flex items-center justify-center px-4 h-10 rounded-full bg-gray-100 text-gray-1200 font-medium active:scale-[0.96] tracking-tight transition-colors duration-150 whitespace-nowrap hover:bg-gray-200"
-              style={{ boxShadow: "var(--shadow-border)" }}
-            >
-              Student details
-            </Link>
           </div>
         </div>
 

@@ -498,8 +498,8 @@ export default function StudentDetailsPage() {
           aria-live="polite"
           className="w-full max-w-sm motion-safe:animate-[fadeInUp_0.35s_cubic-bezier(0.2,0,0,1)_both]"
         >
-          <h1 className="mb-5 text-center text-2xl font-[350] tracking-tight text-gray-1200">
-            <span className="rounded-full bg-gray-200 px-5 py-1.5">
+          <h1 className="mb-5 text-center text-2xl font-[350] tracking-tight text-green-300">
+            <span className="rounded-full bg-green-600/20 px-5 py-1.5">
               Details saved
             </span>
           </h1>
