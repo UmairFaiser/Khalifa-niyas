@@ -3,9 +3,11 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { StudentTestimonialDialog } from "@/components/student-testimonial-dialog";
 import { createClient } from "@/utils/supabase/client";
 
 type StudentDetails = {
+  id: string;
   index_number: string;
   name: string;
   phone_number: string;
@@ -31,8 +33,8 @@ const inputBase =
   "focus:[box-shadow:0_0_0_2px_var(--color-focus-ring),0_0_0_1px_var(--color-gray-800)]";
 
 const inputError =
-  "[box-shadow:0_0_0_1px_oklch(0.55_0.22_27_/_0.55)] " +
-  "focus:[box-shadow:0_0_0_2px_oklch(0.55_0.22_27_/_0.35),0_0_0_1px_oklch(0.55_0.22_27_/_0.6)]";
+  "[box-shadow:0_0_0_1px_var(--color-gray-800)] " +
+  "focus:[box-shadow:0_0_0_2px_var(--color-focus-ring),0_0_0_1px_var(--color-gray-800)]";
 
 const buttonBase =
   "w-full min-h-[48px] py-3 rounded-full font-medium cursor-pointer " +
@@ -41,7 +43,7 @@ const buttonBase =
   "active:scale-[0.96] disabled:active:scale-100 disabled:cursor-not-allowed " +
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-1200/30 focus-visible:ring-offset-2";
 
-const fieldError = "mt-1.5 text-sm text-red-600 leading-snug";
+const fieldError = "mt-1.5 text-sm text-gray-1100 leading-snug";
 
 /* ─────────────────────────── SQL window (read-only) ─────────────────────────── */
 
@@ -60,7 +62,7 @@ const tokenStyle: Record<Kind, string> = {
   punc: "text-gray-1000",
 };
 
-const TABLE = 'public.students-2027';
+const TABLE = "public.students-2027";
 const q = (v: string) => `'${v.replace(/'/g, "''")}'`;
 const cleanPhoneValue = (v: string) => v.replace(/\s|-/g, "");
 const ln = (tokens: Token[], field?: Field): Line => ({ tokens, field });
@@ -265,7 +267,7 @@ function SqlWindow({
 }
 
 /* Split layout: form left, SQL window fills the whole right side (desktop).
-   On mobile the window collapses behind a small toggle. */
+   On mobile the window sits in a full-width accordion under the form. */
 function Shell({
   lines,
   active,
@@ -282,24 +284,48 @@ function Shell({
       <div className="flex min-h-dvh flex-col items-center justify-center px-5 py-8">
         {children}
 
-        <div className="mt-8 flex w-full max-w-sm flex-col items-center lg:hidden">
+        {/* mobile accordion */}
+        <div
+          className="mt-8 w-full max-w-sm overflow-hidden rounded-2xl bg-gray-100 lg:hidden"
+          style={{ boxShadow: "var(--shadow-border)" }}
+        >
           <button
             type="button"
             onClick={() => setShowQuery((v) => !v)}
             aria-expanded={showQuery}
-            className="min-h-10 cursor-pointer rounded-full bg-gray-100 px-4 text-sm text-gray-1100 transition-transform duration-150 active:scale-[0.96]"
-            style={{ boxShadow: "var(--shadow-border)" }}
+            aria-controls="query-panel"
+            className="flex min-h-12 w-full cursor-pointer items-center justify-between px-5 text-sm font-medium text-gray-1200 transition-colors duration-150 active:bg-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gray-1200/30"
           >
-            {showQuery ? "Hide query" : "View query"}
-          </button>
-          {showQuery && (
-            <div
+            <span>View query</span>
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               aria-hidden="true"
-              className="mt-4 w-full motion-safe:animate-[fadeInUp_0.35s_cubic-bezier(0.2,0,0,1)_both]"
+              className={`size-4 text-gray-1000 transition-transform duration-300 ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none ${
+                showQuery ? "rotate-180" : ""
+              }`}
             >
-              <SqlWindow lines={lines} active={active} compact />
+              <path d="M5 8l5 5 5-5" />
+            </svg>
+          </button>
+
+          <div
+            id="query-panel"
+            aria-hidden={!showQuery}
+            className={`grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none ${
+              showQuery ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+            }`}
+          >
+            <div className="min-h-0 overflow-hidden">
+              <div className="p-3 pt-0">
+                <SqlWindow lines={lines} active={active} compact />
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -328,6 +354,8 @@ export default function StudentDetailsPage() {
   const [saved, setSaved] = useState<StudentDetails | null>(null);
   const [active, setActive] = useState<Field | null>(null);
 
+  const [testimonialOpen, setTestimonialOpen] = useState(false);
+
   const isBusy = step === "submitting";
 
   const lines = buildSql(
@@ -347,16 +375,16 @@ export default function StudentDetailsPage() {
   const cleanPhone = (value: string) => value.replace(/\s|-/g, "");
   const validatePhone = (value: string) => /^07\d{8}$/.test(cleanPhone(value));
 
-  const resetToLookup = () => {
-    setStep("lookup");
-    setIndexNumber("");
-    setName("");
-    setPhoneNumber("");
-    setSchool("");
+  // Back to the form with the saved values already filled in
+  const handleEdit = () => {
+    if (!saved) return;
+    setIndexNumber(saved.index_number);
+    setName(saved.name ?? "");
+    setPhoneNumber(saved.phone_number ?? "");
+    setSchool(saved.school ?? "");
     setErrors({});
-    setSaved(null);
     setActive(null);
-    setTimeout(() => indexRef.current?.focus(), 0);
+    setStep("form");
   };
 
   const handleLookup = async (e: React.FormEvent) => {
@@ -372,7 +400,7 @@ export default function StudentDetailsPage() {
     try {
       const { data, error } = await supabase
         .from("students")
-        .select("index_number,name,phone_number,school")
+        .select("id,index_number,name,phone_number,school")
         .ilike("index_number", cleanedIndex)
         .maybeSingle();
 
@@ -421,7 +449,7 @@ export default function StudentDetailsPage() {
     setStep("submitting");
 
     try {
-      const { data, error } = await supabase.rpc("update_student_details", {
+      const { error } = await supabase.rpc("update_student_details", {
         p_index: indexNumber.trim(),
         p_name: name.trim(),
         p_phone: cleanPhone(phoneNumber),
@@ -430,8 +458,19 @@ export default function StudentDetailsPage() {
 
       if (error) throw error;
 
-      const row = data as StudentDetails;
-      setSaved(row);
+      // Fetch the canonical row so the UUID is always available for the FK.
+      const { data: studentRow, error: studentError } = await supabase
+        .from("students")
+        .select("id,index_number,name,phone_number,school")
+        .eq("index_number", indexNumber.trim())
+        .single();
+
+      if (studentError) throw studentError;
+      if (!studentRow?.id) {
+        throw new Error("Your record was updated, but its student ID could not be loaded.");
+      }
+
+      setSaved(studentRow as StudentDetails);
       setStep("success");
     } catch (err: unknown) {
       toast.error(
@@ -443,34 +482,88 @@ export default function StudentDetailsPage() {
     }
   };
 
+  const openTestimonial = () => setTestimonialOpen(true);
+
   if (step === "success" && saved) {
+    const details = [
+      { label: "Name", value: saved.name },
+      { label: "Index number", value: saved.index_number },
+      { label: "Phone", value: saved.phone_number },
+      { label: "School", value: saved.school },
+    ];
+
     return (
       <Shell lines={lines} active={null}>
         <section
           aria-live="polite"
-          className="w-full max-w-sm text-center motion-safe:animate-[fadeInUp_0.35s_cubic-bezier(0.2,0,0,1)_both]"
+          className="w-full max-w-sm motion-safe:animate-[fadeInUp_0.35s_cubic-bezier(0.2,0,0,1)_both]"
         >
-          <h1 className="text-2xl font-[450] text-green-300 leading-tight text-wrap-balance">
-            <span className="rounded-full bg-green-400/20 pb-1.5 border-shadow-border px-5 py-1">
+          <h1 className="mb-5 text-center text-2xl font-[350] tracking-tight text-gray-1200">
+            <span className="rounded-full bg-gray-200 px-5 py-1.5">
               Details saved
             </span>
           </h1>
-          <p className="mt-2 text-sm text-text-paragraph text-wrap-pretty">
-            {saved.name} · {saved.index_number}
-          </p>
+
           <div
-            className="mt-5 rounded-2xl bg-gray-100 px-6 py-5 text-left"
-            style={{ boxShadow: "inset var(--shadow-border)" }}
+            className="overflow-hidden rounded-2xl bg-gray-100"
+            style={{ boxShadow: "var(--shadow-border)" }}
           >
-            <p className="text-sm text-gray-1100">School</p>
-            <p className="mt-1 text-base font-medium text-gray-1200 text-wrap-pretty">
-              {saved.school}
-            </p>
-            <p className="mt-4 text-sm text-gray-1100">Phone</p>
-            <p className="mt-1 text-base font-medium text-gray-1200 tabular-nums">
-              {saved.phone_number}
-            </p>
+            {details.map((detail, index) => (
+              <div
+                key={detail.label}
+                className={`flex items-start justify-between gap-5 px-4 py-4 ${
+                  index !== details.length - 1 ? "border-b border-gray-400" : ""
+                }`}
+              >
+                <span className="shrink-0 text-sm text-gray-1100">
+                  {detail.label}
+                </span>
+
+                <span className="text-right text-sm font-medium text-gray-1200 wrap-break-word">
+                  {detail.value || "—"}
+                </span>
+              </div>
+            ))}
           </div>
+
+          <button
+            type="button"
+            onClick={handleEdit}
+            autoFocus
+            className={`${buttonBase} mt-5 bg-gray-1200 text-gray-background`}
+            style={{ boxShadow: "var(--shadow-custom)" }}
+          >
+            Edit information
+          </button>
+
+          <button
+            type="button"
+            onClick={openTestimonial}
+            className={`${buttonBase} mt-3 border border-gray-400 bg-gray-100 text-gray-1200`}
+            style={{ boxShadow: "var(--shadow-custom)" }}
+          >
+            <span className="flex items-center gap-2">
+              <svg
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                className="size-4"
+              >
+                <path d="M12.5 3.5 16.5 7.5M3.5 16.5l3.2-.7L16 6.5a1.4 1.4 0 0 0-2-2L4.7 13.8l-1.2 2.7Z" />
+              </svg>
+              Add testimonial
+            </span>
+          </button>
+
+          <StudentTestimonialDialog
+            student={saved}
+            open={testimonialOpen}
+            onOpenChange={setTestimonialOpen}
+          />
         </section>
       </Shell>
     );
@@ -550,10 +643,7 @@ export default function StudentDetailsPage() {
             type="submit"
             disabled={isBusy}
             className={`${buttonBase} bg-gray-1200 text-gray-background disabled:opacity-60`}
-            style={{
-              boxShadow:
-                "0 1px 2px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.06)",
-            }}
+            style={{ boxShadow: "var(--shadow-custom)" }}
           >
             {isBusy ? "Saving…" : "Save details"}
           </button>

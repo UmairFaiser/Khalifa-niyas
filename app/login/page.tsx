@@ -11,12 +11,12 @@ export default function LoginPage() {
 
   return (
     <form action={action} className="mx-auto flex w-full max-w-sm flex-col gap-3 p-6">
-      <h1 className="text-lg text-[var(--color-gray-1200)]">Admin login</h1>
+      <h1 className="text-lg text-gray-1200">Admin login</h1>
       <input className={field} name="email" type="email" placeholder="Email" required />
       <input className={field} name="password" type="password" placeholder="Password" required />
       <button
         disabled={pending}
-        className="mt-2 h-10 rounded-full bg-[var(--color-gray-1200)] text-sm text-[var(--color-gray-background)] disabled:opacity-40"
+        className="mt-2 h-10 rounded-full bg-gray-1200 text-sm text-gray-background disabled:opacity-40"
       >
         {pending ? 'Signing in…' : 'Sign in'}
       </button>
