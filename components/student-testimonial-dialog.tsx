@@ -227,7 +227,7 @@ export function StudentTestimonialDialog({
               <Dialog.Description className="mt-1 text-sm text-text-paragraph">
                 {submitted
                   ? "Your testimonial has been received."
-                  : "Write a few words about your experience and sign below."}
+                  : "Write a few words about our classes"}
               </Dialog.Description>
             </div>
 
