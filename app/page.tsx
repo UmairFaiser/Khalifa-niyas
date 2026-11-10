@@ -268,7 +268,7 @@ export default function Home() {
                     "transition-[transform,background-color,color] duration-150 " +
                     "active:scale-[0.96] " +
                     "peer-checked:bg-gray-1200 peer-checked:text-gray-background peer-checked:[box-shadow:none] " +
-                    "peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--color-focus-ring)] peer-focus-visible:ring-offset-2 " +
+                    "peer-focus-visible:ring-2 peer-focus-visible:ring-focus-ring peer-focus-visible:ring-offset-2 " +
                     "peer-disabled:opacity-60 peer-disabled:cursor-not-allowed"
                   }
                 >

@@ -233,7 +233,7 @@ function SqlWindow({
                   </span>
                 ))}
                 {i === cursorIdx && (
-                  <span className="ml-1 inline-block h-4 w-[2px] translate-y-0.5 bg-gray-1200 motion-safe:animate-pulse" />
+                  <span className="ml-1 inline-block h-4 w-0.5 translate-y-0.5 bg-gray-1200 motion-safe:animate-pulse" />
                 )}
               </code>
             </div>
@@ -287,7 +287,7 @@ function Shell({
             type="button"
             onClick={() => setShowQuery((v) => !v)}
             aria-expanded={showQuery}
-            className="min-h-[40px] cursor-pointer rounded-full bg-gray-100 px-4 text-sm text-gray-1100 transition-transform duration-150 active:scale-[0.96]"
+            className="min-h-10 cursor-pointer rounded-full bg-gray-100 px-4 text-sm text-gray-1100 transition-transform duration-150 active:scale-[0.96]"
             style={{ boxShadow: "var(--shadow-border)" }}
           >
             {showQuery ? "Hide query" : "View query"}
