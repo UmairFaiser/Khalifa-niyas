@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { MotionConfig, motion } from "motion/react";
+import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { toast } from "sonner";
 import { StudentTestimonialDialog } from "@/components/student-testimonial-dialog";
 import { createGenie, type Rect } from "@/lib/genie";
@@ -75,7 +75,6 @@ function buildSql(
   name: string,
   phone: string,
   school: string,
-  done: boolean,
 ): Line[] {
   const db = ln([["cmt", "-- database: khalifa-niyas-ict"]]);
 
@@ -123,7 +122,7 @@ function buildSql(
     ];
   }
 
-  const lines: Line[] = [
+  return [
     db,
     ln([
       ["kw", "UPDATE "],
@@ -173,8 +172,6 @@ function buildSql(
       ["punc", "*;"],
     ]),
   ];
-  if (done) lines.push(ln([["cmt", "-- UPDATE 1"]]));
-  return lines;
 }
 
 const light =
@@ -242,18 +239,70 @@ function TrafficLights({ onMinimise }: { onMinimise: () => void }) {
   );
 }
 
+// What RETURNING * sends back, in the shape psql prints with \x.
+function QueryResult({ row }: { row: StudentDetails }) {
+  const fields: [string, string][] = [
+    ["id", row.id],
+    ["index_number", row.index_number],
+    ["name", row.name],
+    ["phone_number", row.phone_number],
+    ["school", row.school ?? "NULL"],
+  ];
+
+  return (
+    <div
+      aria-hidden="true"
+      className="shrink-0 border-t border-border-overlay bg-gray-100 px-5 py-3 font-mono text-xs leading-5 motion-safe:animate-[fadeInUp_0.35s_cubic-bezier(0.2,0,0,1)_both]"
+    >
+      <div className="flex items-center justify-between">
+        <span className="select-none text-gray-900">-[ RECORD 1 ]</span>
+        <span className="rounded bg-gray-300 px-1.5 font-medium text-syntax-string">
+          UPDATE 1
+        </span>
+      </div>
+      <dl className="grid grid-cols-[max-content_1fr] gap-x-2">
+        {fields.map(([key, value]) => (
+          <Fragment key={key}>
+            <dt className="text-syntax-column">{key}</dt>
+            <dd className="break-all text-gray-1200">
+              <span className="text-gray-900">| </span>
+              {value}
+            </dd>
+          </Fragment>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
 function SqlWindow({
   lines,
   active,
+  result,
   onMinimise,
 }: {
   lines: Line[];
   active: Field | null;
+  result: StudentDetails | null;
   onMinimise: () => void;
 }) {
+  const scroller = useRef<HTMLDivElement>(null);
   const activeIdx = active ? lines.findIndex((l) => l.field === active) : -1;
   const cursorIdx = activeIdx >= 0 ? activeIdx : lines.length - 1;
   const filler = Math.max(0, 28 - lines.length);
+
+  // On a short screen the editor shrinks to make room for the result, so keep
+  // the cursor line in view.
+  useEffect(() => {
+    const box = scroller.current;
+    const row = box?.querySelector<HTMLElement>("[data-cursor]");
+    if (!box || !row) return;
+    const top = row.offsetTop - 20;
+    const bottom = row.offsetTop + row.offsetHeight + 20;
+    if (top < box.scrollTop) box.scrollTop = Math.max(top, 0);
+    else if (bottom > box.scrollTop + box.clientHeight)
+      box.scrollTop = bottom - box.clientHeight;
+  }, [active, result, lines.length]);
 
   return (
     <div className="relative flex h-full flex-col overflow-hidden rounded-xl bg-preview-bg after:pointer-events-none after:absolute after:inset-0 after:rounded-xl after:[box-shadow:inset_var(--shadow-border)]">
@@ -268,53 +317,64 @@ function SqlWindow({
         </span>
       </div>
 
-      {/* editor body */}
+      {/* editor: fades at its edges and scrolls only when the screen is too short */}
       <div
+        ref={scroller}
         aria-hidden="true"
-        className="flex-1 overflow-hidden py-5 font-mono text-[13px] leading-7"
+        className="relative flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain font-mono text-[13px] leading-7 [mask-image:linear-gradient(to_bottom,transparent,#000_20px,#000_calc(100%-20px),transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        {lines.map((line, i) => {
-          const isActive = activeIdx === i;
-          const dim = activeIdx >= 0 && !isActive;
-          return (
-            <div
-              key={i}
-              className={`relative flex gap-5 px-5 transition-[background-color,opacity] duration-200 ${
-                isActive ? "bg-gray-200" : ""
-              } ${dim ? "opacity-40" : ""}`}
-            >
-              {isActive && (
-                <span className="absolute inset-y-0 left-0 w-0.5 bg-gray-1200" />
-              )}
-              <span className="w-5 shrink-0 select-none text-right tabular-nums text-gray-800">
-                {i + 1}
-              </span>
-              <code className="whitespace-pre-wrap break-all">
-                {line.tokens.map(([kind, text], j) => (
-                  <span key={j} className={tokenStyle[kind]}>
-                    {text}
-                  </span>
-                ))}
-                {i === cursorIdx && (
-                  <span className="ml-1 inline-block h-4 w-0.5 translate-y-0.5 bg-gray-1200 motion-safe:animate-pulse" />
+        <div className="shrink-0 pt-5">
+          {lines.map((line, i) => {
+            const isActive = activeIdx === i;
+            const dim = activeIdx >= 0 && !isActive;
+            return (
+              <div
+                key={i}
+                data-cursor={i === cursorIdx ? "" : undefined}
+                className={`relative flex gap-5 px-5 transition-[background-color,opacity] duration-200 ${
+                  isActive ? "bg-gray-200" : ""
+                } ${dim ? "opacity-40" : ""}`}
+              >
+                {isActive && (
+                  <span className="absolute inset-y-0 left-0 w-0.5 bg-gray-1200" />
                 )}
-              </code>
+                <span className="w-5 shrink-0 select-none text-right tabular-nums text-gray-800">
+                  {i + 1}
+                </span>
+                <code className="whitespace-pre-wrap break-all">
+                  {line.tokens.map(([kind, text], j) => (
+                    <span key={j} className={tokenStyle[kind]}>
+                      {text}
+                    </span>
+                  ))}
+                  {i === cursorIdx && (
+                    <span className="ml-1 inline-block h-4 w-0.5 translate-y-0.5 bg-gray-1200 motion-safe:animate-pulse" />
+                  )}
+                </code>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* empty line numbers fill whatever room is left, and never add scroll */}
+        <div className="min-h-0 flex-1 overflow-hidden">
+          {Array.from({ length: filler }).map((_, i) => (
+            <div key={`f${i}`} className="flex gap-5 px-5">
+              <span className="w-5 shrink-0 select-none text-right tabular-nums text-gray-600">
+                {lines.length + i + 1}
+              </span>
             </div>
-          );
-        })}
-        {Array.from({ length: filler }).map((_, i) => (
-          <div key={`f${i}`} className="flex gap-5 px-5">
-            <span className="w-5 shrink-0 select-none text-right tabular-nums text-gray-600">
-              {lines.length + i + 1}
-            </span>
-          </div>
-        ))}
+          ))}
+        </div>
+        <div className="h-4 shrink-0" />
       </div>
+
+      {result && <QueryResult row={result} />}
 
       {/* status bar */}
       <div
         aria-hidden="true"
-        className="flex items-center justify-between border-t border-border-overlay bg-gray-200 px-5 py-2.5 font-mono text-[11px] text-gray-1000"
+        className="flex shrink-0 items-center justify-between border-t border-border-overlay bg-gray-200 px-5 py-2.5 font-mono text-[11px] text-gray-1000"
       >
         <div className="flex items-center gap-2">
           <span className="size-1.5 rounded-full bg-gray-1100 motion-safe:animate-pulse" />
@@ -336,13 +396,21 @@ function SqlWindow({
 const DOCK_LIFT = 28;
 const DOCK_EASE = [0.23, 1, 0.32, 1] as const;
 
+// The easter egg hint shows once, a few seconds in, and never again after it
+// has been seen, ignored for a while, or the window has been minimised.
+const HINT_KEY = "sql-window-hint-seen";
+const HINT_DELAY = 3000;
+const HINT_TIME = 10000;
+
 function useGenieWindow() {
   const windowRef = useRef<HTMLDivElement>(null);
   const dockRef = useRef<HTMLDivElement>(null);
   const iconRef = useRef<HTMLButtonElement>(null);
   const genie = useRef<ReturnType<typeof createGenie> | null>(null);
+  const hintSeen = useRef(false);
   const [closed, setClosed] = useState(false);
   const [dockShown, setDockShown] = useState(false);
+  const [hint, setHint] = useState(false);
 
   useEffect(() => {
     const instance = createGenie({
@@ -369,12 +437,39 @@ function useGenieWindow() {
     if (dockShown) iconRef.current?.focus({ preventScroll: true });
   }, [dockShown]);
 
+  const endHint = useCallback(() => {
+    hintSeen.current = true;
+    setHint(false);
+    try {
+      localStorage.setItem(HINT_KEY, "1");
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      hintSeen.current = localStorage.getItem(HINT_KEY) === "1";
+    } catch {}
+    if (hintSeen.current) return;
+
+    let hide: ReturnType<typeof setTimeout> | undefined;
+    const show = setTimeout(() => {
+      if (hintSeen.current) return;
+      setHint(true);
+      hide = setTimeout(endHint, HINT_TIME);
+    }, HINT_DELAY);
+    return () => {
+      clearTimeout(show);
+      clearTimeout(hide);
+    };
+  }, [endHint]);
+
   const minimise = useCallback(() => {
     // The copies are measured first, while the Dock is still down.
     genie.current?.play(1);
     setClosed(true);
     setDockShown(true);
-  }, []);
+    endHint();
+  }, [endHint]);
 
   const restore = useCallback(() => {
     setClosed(false);
@@ -386,7 +481,7 @@ function useGenieWindow() {
     });
   }, []);
 
-  return { windowRef, dockRef, iconRef, closed, dockShown, minimise, restore };
+  return { windowRef, dockRef, iconRef, closed, dockShown, hint, minimise, restore };
 }
 
 type GenieWindow = ReturnType<typeof useGenieWindow>;
@@ -454,11 +549,13 @@ function Dock({ genie }: { genie: GenieWindow }) {
 function Shell({
   lines,
   active,
+  result,
   genie,
   children,
 }: {
   lines: Line[];
   active: Field | null;
+  result: StudentDetails | null;
   genie: GenieWindow;
   children: React.ReactNode;
 }) {
@@ -471,9 +568,32 @@ function Shell({
         <div className="flex w-full flex-col items-center">{children}</div>
       </div>
 
-      <div className="pointer-events-none fixed inset-y-0 right-0 hidden w-1/2 p-4 pb-20 lg:block">
-        <div ref={genie.windowRef} className="pointer-events-auto h-full">
-          <SqlWindow lines={lines} active={active} onMinimise={genie.minimise} />
+      <div className="pointer-events-none fixed inset-y-0 right-0 hidden w-1/2 items-center justify-center px-4 py-12 lg:flex">
+        <MotionConfig reducedMotion="user">
+          <AnimatePresence>
+            {genie.hint && (
+              <motion.div
+                key="hint"
+                aria-hidden="true"
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                transition={{ duration: 0.3, ease: DOCK_EASE }}
+                className="absolute left-4 top-4 select-none rounded-full bg-gray-1200 px-3 py-1 text-xs font-medium text-gray-background after:absolute after:left-[22px] after:top-full after:border-x-4 after:border-t-4 after:border-x-transparent after:border-t-gray-1200"
+              >
+                Psst, try the red button
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </MotionConfig>
+
+        <div ref={genie.windowRef} className="pointer-events-auto h-full w-full">
+          <SqlWindow
+            lines={lines}
+            active={active}
+            result={result}
+            onMinimise={genie.minimise}
+          />
         </div>
       </div>
 
@@ -502,14 +622,7 @@ export default function StudentDetailsPage() {
 
   const isBusy = step === "submitting";
 
-  const lines = buildSql(
-    step,
-    indexNumber,
-    name,
-    phoneNumber,
-    school,
-    step === "success",
-  );
+  const lines = buildSql(step, indexNumber, name, phoneNumber, school);
 
   const focusProps = (field: Field) => ({
     onFocus: () => setActive(field),
@@ -637,12 +750,12 @@ export default function StudentDetailsPage() {
     ];
 
     return (
-      <Shell lines={lines} active={null} genie={genie}>
+      <Shell lines={lines} active={null} result={saved} genie={genie}>
         <section
           aria-live="polite"
           className="w-full max-w-sm motion-safe:animate-[fadeInUp_0.35s_cubic-bezier(0.2,0,0,1)_both]"
         >
-          <h1 className="mb-5 text-center text-2xl font-[350] tracking-tight text-green-300">
+          <h1 className="mb-5 text-center text-2xl font-[350] tracking-tight dark:text-green-300 text-green-700">
             <span className="rounded-full bg-green-600/20 px-5 py-1.5">
               Details saved
             </span>
@@ -715,7 +828,7 @@ export default function StudentDetailsPage() {
 
   if (step === "form" || (step === "submitting" && Boolean(name))) {
     return (
-      <Shell lines={lines} active={active} genie={genie}>
+      <Shell lines={lines} active={active} result={null} genie={genie}>
         <h1 className="text-4xl tracking-tighter mb-10 font-190 text-center text-gray-1200 text-wrap-balance">
           {name}'s <span className="text-gray-1000 font-[450]">details</span>
         </h1>
@@ -797,7 +910,7 @@ export default function StudentDetailsPage() {
   }
 
   return (
-    <Shell lines={lines} active={active} genie={genie}>
+    <Shell lines={lines} active={active} result={null} genie={genie}>
       <h1 className="text-4xl tracking-tighter mb-3 font-[450] text-center text-gray-1200 text-wrap-balance">
         Find your record
       </h1>
