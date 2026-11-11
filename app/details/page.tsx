@@ -423,7 +423,6 @@ function Dock({ genie }: { genie: GenieWindow }) {
             onClick={genie.restore}
             aria-label="Restore query window"
             className="grid size-11 cursor-pointer place-items-center rounded-xl bg-preview-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-1200/30 [&:active>svg]:scale-95 [&>svg]:transition-transform [&>svg]:duration-150"
-            style={{ boxShadow: "var(--shadow-custom)" }}
           >
             <svg viewBox="0 0 28 28" aria-hidden="true" className="size-7">
               <rect
