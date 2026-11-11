@@ -1,9 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { MotionConfig, motion } from "motion/react";
 import { toast } from "sonner";
 import { StudentTestimonialDialog } from "@/components/student-testimonial-dialog";
+import { createGenie, type Rect } from "@/lib/genie";
 import { createClient } from "@/utils/supabase/client";
 
 type StudentDetails = {
@@ -175,31 +177,91 @@ function buildSql(
   return lines;
 }
 
+const light =
+  "relative grid size-3 place-items-center rounded-full border " +
+  "before:absolute before:-inset-1 transition-[filter] duration-100 active:brightness-90 " +
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-1200/30 focus-visible:ring-offset-1";
+
+const glyph =
+  "size-2 opacity-0 transition-opacity duration-100 group-hover:opacity-100";
+
+// The real macOS colours. Red and yellow both send the window to the Dock.
+function TrafficLights({ onMinimise }: { onMinimise: () => void }) {
+  return (
+    <div className="group flex select-none items-center gap-2">
+      <button
+        type="button"
+        onClick={onMinimise}
+        aria-label="Close query window"
+        className={`${light} cursor-pointer border-[#e0443e] bg-[#ff5f57] text-[#4c0002]`}
+      >
+        <svg
+          viewBox="0 0 12 12"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+          aria-hidden="true"
+          className={glyph}
+        >
+          <path d="M3.5 3.5l5 5M8.5 3.5l-5 5" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        onClick={onMinimise}
+        aria-label="Minimise query window"
+        className={`${light} cursor-pointer border-[#dea123] bg-[#febc2e] text-[#985600]`}
+      >
+        <svg
+          viewBox="0 0 12 12"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+          aria-hidden="true"
+          className={glyph}
+        >
+          <path d="M3 6h6" />
+        </svg>
+      </button>
+      <span
+        aria-hidden="true"
+        className={`${light} border-[#1aab29] bg-[#28c840] text-[#006500]`}
+      >
+        <svg
+          viewBox="0 0 12 12"
+          fill="currentColor"
+          aria-hidden="true"
+          className={glyph}
+        >
+          <path d="M3.2 3.2h4l-4 4zM8.8 8.8h-4l4-4z" />
+        </svg>
+      </span>
+    </div>
+  );
+}
+
 function SqlWindow({
   lines,
   active,
-  compact = false,
+  onMinimise,
 }: {
   lines: Line[];
   active: Field | null;
-  compact?: boolean;
+  onMinimise: () => void;
 }) {
   const activeIdx = active ? lines.findIndex((l) => l.field === active) : -1;
   const cursorIdx = activeIdx >= 0 ? activeIdx : lines.length - 1;
-  const filler = compact ? 0 : Math.max(0, 28 - lines.length);
+  const filler = Math.max(0, 28 - lines.length);
 
   return (
-    <div
-      className="flex h-full flex-col overflow-hidden rounded-xl bg-preview-bg"
-      style={{ boxShadow: "var(--shadow-custom)" }}
-    >
+    <div className="relative flex h-full flex-col overflow-hidden rounded-xl bg-preview-bg after:pointer-events-none after:absolute after:inset-0 after:rounded-xl after:[box-shadow:inset_var(--shadow-border)]">
       {/* title bar */}
       <div className="flex items-center gap-1.5 border-b border-border-overlay bg-gray-200 px-5 py-3">
-        <span className="size-2.5 rounded-full bg-gray-500" />
-        <span className="size-2.5 rounded-full bg-gray-500" />
-        <span className="size-2.5 rounded-full bg-gray-500" />
+        <TrafficLights onMinimise={onMinimise} />
         <span
-          className="ml-4 rounded-md bg-preview-bg px-2.5 py-1 font-mono text-xs text-gray-1200"
+          className="ml-4 select-none rounded-md bg-preview-bg px-2.5 py-1 font-mono text-xs text-gray-1200"
           style={{ boxShadow: "var(--shadow-border)" }}
         >
           students-2027.sql
@@ -208,9 +270,8 @@ function SqlWindow({
 
       {/* editor body */}
       <div
-        className={`flex-1 overflow-hidden py-5 font-mono ${
-          compact ? "text-[11.5px] leading-6" : "text-[13px] leading-7"
-        }`}
+        aria-hidden="true"
+        className="flex-1 overflow-hidden py-5 font-mono text-[13px] leading-7"
       >
         {lines.map((line, i) => {
           const isActive = activeIdx === i;
@@ -242,7 +303,7 @@ function SqlWindow({
           );
         })}
         {Array.from({ length: filler }).map((_, i) => (
-          <div key={`f${i}`} className="flex gap-5 px-5" aria-hidden="true">
+          <div key={`f${i}`} className="flex gap-5 px-5">
             <span className="w-5 shrink-0 select-none text-right tabular-nums text-gray-600">
               {lines.length + i + 1}
             </span>
@@ -251,7 +312,10 @@ function SqlWindow({
       </div>
 
       {/* status bar */}
-      <div className="flex items-center justify-between border-t border-border-overlay bg-gray-200 px-5 py-2.5 font-mono text-[11px] text-gray-1000">
+      <div
+        aria-hidden="true"
+        className="flex items-center justify-between border-t border-border-overlay bg-gray-200 px-5 py-2.5 font-mono text-[11px] text-gray-1000"
+      >
         <div className="flex items-center gap-2">
           <span className="size-1.5 rounded-full bg-gray-1100 motion-safe:animate-pulse" />
           <span>khalifa-niyas-ict</span>
@@ -266,75 +330,155 @@ function SqlWindow({
   );
 }
 
-/* Split layout: form left, SQL window fills the whole right side (desktop).
-   On mobile the window sits in a full-width accordion under the form. */
+/* ─────────────────────────────── Genie + Dock ─────────────────────────────── */
+
+// How far the Dock sits below its resting place while it is hidden.
+const DOCK_LIFT = 28;
+const DOCK_EASE = [0.23, 1, 0.32, 1] as const;
+
+function useGenieWindow() {
+  const windowRef = useRef<HTMLDivElement>(null);
+  const dockRef = useRef<HTMLDivElement>(null);
+  const iconRef = useRef<HTMLButtonElement>(null);
+  const genie = useRef<ReturnType<typeof createGenie> | null>(null);
+  const [closed, setClosed] = useState(false);
+  const [dockShown, setDockShown] = useState(false);
+
+  useEffect(() => {
+    const instance = createGenie({
+      source: () => windowRef.current,
+      // Where the icon will rest, even while the Dock is still sliding up.
+      icon: (): Rect | null => {
+        const icon = iconRef.current;
+        const dock = dockRef.current;
+        if (!icon || !dock) return null;
+        const box = icon.getBoundingClientRect();
+        const lift = new DOMMatrixReadOnly(getComputedStyle(dock).transform).m42;
+        return { x: box.left, y: box.top - lift, width: box.width, height: box.height };
+      },
+      reduced: () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    });
+    genie.current = instance;
+    return () => {
+      instance.dispose();
+      genie.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (dockShown) iconRef.current?.focus({ preventScroll: true });
+  }, [dockShown]);
+
+  const minimise = useCallback(() => {
+    // The copies are measured first, while the Dock is still down.
+    genie.current?.play(1);
+    setClosed(true);
+    setDockShown(true);
+  }, []);
+
+  const restore = useCallback(() => {
+    setClosed(false);
+    genie.current?.play(0, () => {
+      setDockShown(false);
+      windowRef.current
+        ?.querySelector<HTMLElement>("button")
+        ?.focus({ preventScroll: true });
+    });
+  }, []);
+
+  return { windowRef, dockRef, iconRef, closed, dockShown, minimise, restore };
+}
+
+type GenieWindow = ReturnType<typeof useGenieWindow>;
+
+function Dock({ genie }: { genie: GenieWindow }) {
+  return (
+    <div className="pointer-events-none fixed inset-x-0 bottom-3 z-50 hidden justify-center lg:flex">
+      <MotionConfig reducedMotion="user">
+        <motion.div
+          ref={genie.dockRef}
+          initial={false}
+          animate={genie.dockShown ? "show" : "hide"}
+          variants={{
+            hide: {
+              opacity: 0,
+              y: DOCK_LIFT,
+              transition: { duration: 0.2, ease: DOCK_EASE },
+            },
+            show: {
+              opacity: 1,
+              y: 0,
+              transition: { duration: 0.32, ease: DOCK_EASE },
+            },
+          }}
+          inert={!genie.dockShown}
+          className={`relative rounded-2xl bg-gray-100/70 p-1.5 pb-2.5 backdrop-blur-xl ${
+            genie.dockShown ? "pointer-events-auto" : ""
+          }`}
+          style={{ boxShadow: "var(--shadow-custom)" }}
+        >
+          <button
+            ref={genie.iconRef}
+            type="button"
+            onClick={genie.restore}
+            aria-label="Restore query window"
+            className="grid size-11 cursor-pointer place-items-center rounded-xl bg-preview-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-1200/30 [&:active>svg]:scale-95 [&>svg]:transition-transform [&>svg]:duration-150"
+            style={{ boxShadow: "var(--shadow-custom)" }}
+          >
+            <svg viewBox="0 0 28 28" aria-hidden="true" className="size-7">
+              <rect
+                x="3"
+                y="5"
+                width="22"
+                height="18"
+                rx="3.5"
+                className="fill-gray-200 stroke-gray-800"
+                strokeWidth="1"
+              />
+              <circle cx="7.5" cy="9.5" r="1" fill="#ff5f57" />
+              <circle cx="10.5" cy="9.5" r="1" fill="#febc2e" />
+              <circle cx="13.5" cy="9.5" r="1" fill="#28c840" />
+              <rect x="7" y="13" width="7" height="1.6" rx="0.8" className="fill-syntax-keyword" />
+              <rect x="7" y="16.2" width="13" height="1.6" rx="0.8" className="fill-syntax-column" />
+              <rect x="7" y="19.4" width="9" height="1.6" rx="0.8" className="fill-syntax-string" />
+            </svg>
+          </button>
+          <span className="absolute bottom-1 left-1/2 size-1 -translate-x-1/2 rounded-full bg-gray-1100" />
+        </motion.div>
+      </MotionConfig>
+    </div>
+  );
+}
+
+/* Form on the left, SQL window on the right (large screens only). Minimising
+   the window sends it to the Dock and the form glides to the centre. */
 function Shell({
   lines,
   active,
+  genie,
   children,
 }: {
   lines: Line[];
   active: Field | null;
+  genie: GenieWindow;
   children: React.ReactNode;
 }) {
-  const [showQuery, setShowQuery] = useState(false);
-
   return (
-    <main className="min-h-dvh lg:grid lg:grid-cols-2">
-      <div className="flex min-h-dvh flex-col items-center justify-center px-5 py-8">
-        {children}
+    <main className="min-h-dvh">
+      <div
+        data-closed={genie.closed}
+        className="flex min-h-dvh w-full items-center justify-center px-5 py-8 transition-transform duration-400 ease-[cubic-bezier(0.77,0,0.175,1)] motion-reduce:transition-none lg:w-1/2 lg:data-[closed=true]:translate-x-1/2"
+      >
+        <div className="flex w-full flex-col items-center">{children}</div>
+      </div>
 
-        {/* mobile accordion */}
-        <div
-          className="mt-8 w-full max-w-sm overflow-hidden rounded-2xl bg-gray-100 lg:hidden"
-          style={{ boxShadow: "var(--shadow-border)" }}
-        >
-          <button
-            type="button"
-            onClick={() => setShowQuery((v) => !v)}
-            aria-expanded={showQuery}
-            aria-controls="query-panel"
-            className="flex min-h-12 w-full cursor-pointer items-center justify-between px-5 text-sm font-medium text-gray-1200 transition-colors duration-150 active:bg-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gray-1200/30"
-          >
-            <span>View query</span>
-            <svg
-              viewBox="0 0 20 20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.75"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-              className={`size-4 text-gray-1000 transition-transform duration-300 ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none ${
-                showQuery ? "rotate-180" : ""
-              }`}
-            >
-              <path d="M5 8l5 5 5-5" />
-            </svg>
-          </button>
-
-          <div
-            id="query-panel"
-            aria-hidden={!showQuery}
-            className={`grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none ${
-              showQuery ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-            }`}
-          >
-            <div className="min-h-0 overflow-hidden">
-              <div className="p-3 pt-0">
-                <SqlWindow lines={lines} active={active} compact />
-              </div>
-            </div>
-          </div>
+      <div className="pointer-events-none fixed inset-y-0 right-0 hidden w-1/2 p-4 pb-20 lg:block">
+        <div ref={genie.windowRef} className="pointer-events-auto h-full">
+          <SqlWindow lines={lines} active={active} onMinimise={genie.minimise} />
         </div>
       </div>
 
-      <div
-        aria-hidden="true"
-        className="sticky top-0 hidden h-dvh self-start p-4 lg:block"
-      >
-        <SqlWindow lines={lines} active={active} />
-      </div>
+      <Dock genie={genie} />
     </main>
   );
 }
@@ -344,6 +488,7 @@ function Shell({
 export default function StudentDetailsPage() {
   const supabase = createClient();
   const indexRef = useRef<HTMLInputElement>(null);
+  const genie = useGenieWindow();
 
   const [step, setStep] = useState<Step>("lookup");
   const [indexNumber, setIndexNumber] = useState("");
@@ -493,7 +638,7 @@ export default function StudentDetailsPage() {
     ];
 
     return (
-      <Shell lines={lines} active={null}>
+      <Shell lines={lines} active={null} genie={genie}>
         <section
           aria-live="polite"
           className="w-full max-w-sm motion-safe:animate-[fadeInUp_0.35s_cubic-bezier(0.2,0,0,1)_both]"
@@ -571,7 +716,7 @@ export default function StudentDetailsPage() {
 
   if (step === "form" || (step === "submitting" && Boolean(name))) {
     return (
-      <Shell lines={lines} active={active}>
+      <Shell lines={lines} active={active} genie={genie}>
         <h1 className="text-4xl tracking-tighter mb-10 font-190 text-center text-gray-1200 text-wrap-balance">
           {name}'s <span className="text-gray-1000 font-[450]">details</span>
         </h1>
@@ -653,7 +798,7 @@ export default function StudentDetailsPage() {
   }
 
   return (
-    <Shell lines={lines} active={active}>
+    <Shell lines={lines} active={active} genie={genie}>
       <h1 className="text-4xl tracking-tighter mb-3 font-[450] text-center text-gray-1200 text-wrap-balance">
         Find your record
       </h1>
