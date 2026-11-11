@@ -49,8 +49,7 @@ function AnimatedSignature({
     strokes.forEach((stroke, index) => {
       if (index > 0) {
         const previous = strokes[index - 1]!;
-        const previousEnd =
-          previous.points[previous.points.length - 1]?.t ?? 0;
+        const previousEnd = previous.points[previous.points.length - 1]?.t ?? 0;
         const gap = stroke.at - (previous.at + previousEnd);
         cursor += Math.min(220, Math.max(80, gap));
       }
@@ -222,7 +221,14 @@ export function StudentTestimonialDialog({
                 id="testimonial-title"
                 className="text-xl font-medium tracking-tight text-gray-1200"
               >
-                {submitted ? `Thank you, ${student.name}!` : "Share your experience"}
+                {submitted ? (
+                  <>
+                    Thank you,{" "}
+                    <span className="text-gray-1000">{student.name}</span>
+                  </>
+                ) : (
+                  "Share your experience"
+                )}
               </Dialog.Title>
               <Dialog.Description className="mt-1 text-sm text-text-paragraph">
                 {submitted
@@ -274,7 +280,9 @@ export function StudentTestimonialDialog({
 
                   <div className="overflow-hidden rounded-xl border border-gray-400 bg-preview-bg p-2">
                     <SignaturePad
-                      key={open ? "testimonial-pad-open" : "testimonial-pad-closed"}
+                      key={
+                        open ? "testimonial-pad-open" : "testimonial-pad-closed"
+                      }
                       signer={student.name}
                       hint="Sign here"
                       defaultColor="black"

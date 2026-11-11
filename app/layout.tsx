@@ -38,7 +38,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             position="top-center"
             theme="system"
             richColors
-            toastOptions={{ style: { borderRadius: "9999px" } }}
+            toastOptions={{
+              style: { borderRadius: "9999px", padding: "10px 16px" },
+            }}
           />
         </ThemeProvider>
       </body>
