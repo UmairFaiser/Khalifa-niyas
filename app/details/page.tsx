@@ -109,7 +109,7 @@ function buildSql(
         [
           ["kw", "WHERE "],
           ["col", "index_number "],
-          ["kw", "LIKE "],
+          ["punc", "= "],
           ["str", q(index.trim().toUpperCase())],
         ],
         "index",
@@ -655,10 +655,11 @@ export default function StudentDetailsPage() {
     setStep("submitting");
 
     try {
+      // Exact match: `%` and `_` are plain characters here, not wildcards.
       const { data, error } = await supabase
         .from("students")
         .select("id,index_number,name,phone_number,school")
-        .ilike("index_number", cleanedIndex)
+        .eq("index_number", cleanedIndex)
         .maybeSingle();
 
       if (error) throw error;
