@@ -5,6 +5,16 @@ import { Stub } from "./_variants/stub";
 import { Pass } from "./_variants/pass";
 import { Pinned } from "./_variants/pinned";
 import { Compact } from "./_variants/compact";
+import { Dither } from "./_variants/header-dither";
+import { Terminal } from "./_variants/header-terminal";
+import { DecodeHeader } from "./_variants/header-decode";
+import { GateHeader } from "./_variants/header-gate";
+import { Packets } from "./_variants/header-packets";
+import { Grain } from "./_variants/header-grain";
+import { Glyph } from "./_variants/header-glyph";
+import { Lens } from "./_variants/header-lens";
+import { DecodePlus } from "./_variants/header-decodeplus";
+import { Loader } from "./_variants/header-loader";
 
 /* ---------------------------------------------------------------------------
  * THE ONLY FILE YOU EDIT TO ADD PROTOTYPES.
@@ -47,6 +57,28 @@ export const ROUNDS: Round[] = [
       { name: "Pass", component: Pass }, // axis: header hierarchy
       { name: "Pinned", component: Pinned }, // axis: container (wall)
       { name: "Compact", component: Compact }, // axis: density (3 lanes)
+    ],
+  },
+  {
+    id: "header-styles",
+    title: "Compact (locked) + new ICT-themed headings",
+    variants: [
+      { name: "Dither", component: Dither }, // axis: pixel dither (canvas)
+      { name: "Terminal", component: Terminal }, // axis: voice (mono SQL)
+      { name: "Decode", component: DecodeHeader }, // axis: binary resolving to text
+      { name: "Gate", component: GateHeader }, // axis: metaphor, logic gate
+      { name: "Packets", component: Packets }, // axis: metaphor, networking
+    ],
+  },
+  {
+    id: "dither-decode-mix",
+    title: "Dither x Decode mixes (Compact locked)",
+    variants: [
+      { name: "Grain", component: Grain }, // axis: texture (organic dither, hover re-forms)
+      { name: "Glyph", component: Glyph }, // axis: the mix (decode drawn in dither)
+      { name: "Lens", component: Lens }, // axis: interaction (pointer dithers text away)
+      { name: "Decode+", component: DecodePlus }, // axis: education (hover re-decodes, ASCII)
+      { name: "Loader", component: Loader }, // axis: metaphor (decrypting progress bar)
     ],
   },
   // Next round goes here:

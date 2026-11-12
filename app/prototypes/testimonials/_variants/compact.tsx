@@ -1,11 +1,13 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { INSTITUTE_LABEL, Sig, type Row } from "../shared";
 import { QuoteMark, TickerShell, tilt } from "../shells";
 
-// Axis: density. Narrow, short tickets on three lanes: more voices on screen
-// at once, three lines of quote each.
-function Card({ item, index }: { item: Row; index: number }) {
+// LOCKED card: narrow, short tickets on three lanes (density axis). Other
+// rounds reuse it through <CompactTicker header={...} /> so only the page
+// header changes.
+export function CompactCard({ item, index }: { item: Row; index: number }) {
   return (
     <figure
       className="flex h-56 w-64 flex-col overflow-hidden rounded-2xl bg-gray-100"
@@ -40,12 +42,24 @@ function Card({ item, index }: { item: Row; index: number }) {
   );
 }
 
-export function Compact({ rows }: { rows: Row[] }) {
+/** The locked layout. Pass a `header` to try a different page heading. */
+export function CompactTicker({
+  rows,
+  header,
+}: {
+  rows: Row[];
+  header?: ReactNode;
+}) {
   return (
     <TickerShell
       rows={rows}
       lanes={3}
-      renderCard={(item, i) => <Card item={item} index={i} />}
+      header={header}
+      renderCard={(item, i) => <CompactCard item={item} index={i} />}
     />
   );
+}
+
+export function Compact({ rows }: { rows: Row[] }) {
+  return <CompactTicker rows={rows} />;
 }

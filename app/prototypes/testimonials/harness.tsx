@@ -15,7 +15,7 @@ const useIsoLayoutEffect =
 
 export function Harness({
   rows,
-  round: roundId,
+  round: roundParam,
   initial,
 }: {
   rows: Row[];
@@ -23,7 +23,11 @@ export function Harness({
   initial: number;
 }) {
   // Unknown or missing ?round= falls back to the latest round.
-  const round = ROUNDS.find((r) => r.id === roundId) ?? ROUNDS[ROUNDS.length - 1];
+  const [roundId, setRoundId] = useState(
+    (ROUNDS.find((r) => r.id === roundParam) ?? ROUNDS[ROUNDS.length - 1])?.id,
+  );
+  const round =
+    ROUNDS.find((r) => r.id === roundId) ?? ROUNDS[ROUNDS.length - 1];
   const variants = round?.variants ?? [];
 
   const [current, setCurrent] = useState(
@@ -113,6 +117,27 @@ export function Harness({
         <Active rows={rows} />
       </div>
 
+      {ROUNDS.length > 1 ? (
+        <nav className="proto-rounds" aria-label="Prototype rounds">
+          {ROUNDS.map((r) => (
+            <button
+              key={r.id}
+              type="button"
+              title={r.title}
+              data-active={r.id === round.id ? "" : undefined}
+              aria-current={r.id === round.id ? "true" : undefined}
+              onClick={() => {
+                setRoundId(r.id);
+                setCurrent(0);
+                setEpoch((n) => n + 1);
+              }}
+            >
+              {r.id}
+            </button>
+          ))}
+        </nav>
+      ) : null}
+
       <nav
         ref={picker}
         className="proto-picker"
@@ -177,6 +202,40 @@ const CSS = `
   .proto-rise, .proto-fade, .proto-ticker { animation: none; }
   .proto-stack-card { transition: none; }
 }
+
+/* ---- round switcher (separate from the picker) ---- */
+.proto-rounds {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 2147483647;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(10, 10, 10, 0.82);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.4);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08) inset, 0 4px 12px rgba(0, 0, 0, 0.18);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  line-height: 1;
+}
+.proto-rounds button {
+  height: 24px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  font: inherit;
+  cursor: pointer;
+  transition: color 150ms ease-out, background-color 150ms ease-out, transform 150ms ease-out;
+}
+.proto-rounds button:hover { color: rgba(255, 255, 255, 0.85); }
+.proto-rounds button:active { transform: scale(0.97); }
+.proto-rounds button[data-active] { color: #fff; background: rgba(255, 255, 255, 0.12); }
+.proto-rounds button:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.4); outline-offset: 2px; }
 
 /* ---- picker: verbatim from PICKER.md ---- */
 .proto-picker {
