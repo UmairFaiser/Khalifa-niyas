@@ -225,6 +225,15 @@ body {
   }
 }
 
+@keyframes marqueeY {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
 @layer components {
   .shadow-card {
     box-shadow: var(--shadow-custom);
