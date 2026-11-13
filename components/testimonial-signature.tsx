@@ -15,6 +15,18 @@ const COLORS: InkColor[] = ["black", "blue", "violet", "white"];
 const WIDTHS: InkWidth[] = ["fine", "medium", "bold"];
 
 /**
+ * The ink as it should be shown on a card. Black and white are the form's
+ * "default" inks for the light and dark themes, so on a card they follow the
+ * theme's foreground rather than vanish (black on a dark card, white on a
+ * light one). Blue and violet are always literal.
+ */
+export function inkFill(color: InkColor) {
+  return color === "black" || color === "white"
+    ? "var(--color-gray-1200)"
+    : inkColorValue(color);
+}
+
+/**
  * signature_strokes is written straight from the browser, so treat it as
  * untrusted input: anything that is not a well-formed stroke is dropped before
  * it reaches strokePath(). We deliberately draw the strokes instead of
@@ -106,7 +118,7 @@ export function TestimonialSignature({
       box: inkBounds(list),
       paths: list.map((stroke) => ({
         d: strokePath(stroke),
-        fill: inkColorValue(stroke.color),
+        fill: inkFill(stroke.color),
       })),
     };
   }, [strokes]);

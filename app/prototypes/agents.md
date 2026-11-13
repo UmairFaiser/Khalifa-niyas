@@ -14,6 +14,9 @@ Work here follows the `/prototype` skill (Emil Kowalski's
 | `registry.ts` | List of **rounds** and their variants | **Yes: the only file to edit** |
 | `shells.tsx` | Reusable page layouts: `TickerShell`, `WallShell`, `GridShell`, `PageShell` (+ `tilt`, `QuoteMark`, `initials`) | Only to **add** a new shell |
 | `shared.tsx` | `Row` type, `Sig`, `meta`, `formatDate`, `Header`, sample data | Rarely |
+| `dither.tsx` | Dither engine: `DitherHeading` (modes `grain`/`glyph`/`lens`) and `DitherBar`. Canvas, grain threshold, noise-warped reveal | Reuse; extend with a new mode if needed |
+| `scramble.tsx` | DOM decode: `useScramble` + `ScrambleText` (`rescramble(i)` for hover). Crisp real type, no layout shift | Reuse |
+| `featured.tsx` | `FeaturedLine`: a real testimonial snippet that decodes in and rotates (hover pauses) | Reuse |
 | `_variants/*.tsx` | One file per variant (usually just a card + a shell) | Add new files |
 
 ## Add a new round (new `/prototype` or `riff <variant>` run)
@@ -35,6 +38,35 @@ Work here follows the `/prototype` skill (Emil Kowalski's
 
 `riff <variant>`: new round whose variants diverge *around* the named one;
 keep what the user said they liked from earlier rounds.
+
+## Locked decisions
+
+- **Card: Compact** (`_variants/compact.tsx`, three lanes of narrow tickets).
+  It is exported as `CompactTicker`. To explore the page heading, pass a
+  `header` prop instead of rebuilding the layout:
+  `<CompactTicker rows={rows} header={<header>…</header>} />`.
+  Don't change the card unless the user asks to reopen it.
+- Heading variants must keep a real `<h1>` (or `aria-label` on it) and the
+  text "What students say", and must be static-but-complete under
+  `prefers-reduced-motion`. Put keyframes in the variant (a `<style>` inside
+  the header), wrapped in `@media (prefers-reduced-motion: no-preference)`.
+
+## Design direction (learned from feedback)
+
+- Dither/decode style is liked; **it must relate to testimonials** (quote
+  marks, speech bubbles, real students and real quotes), not abstract
+  decoration like loading bars.
+- **No stray static or noise around shapes.** Grain lives only inside the
+  letterforms/outlines. Don't reintroduce the noise-blob area or progress bars.
+
+- **The speech bubble is the liked direction** (title decoding inside a dithered
+  bubble), and the dithered quote mark is liked too. Riff on those.
+- Interactions must **never blink**: grain thins to ~40% and recovers
+  (`pulse`), it never goes to empty. Retarget animations instead of restarting
+  them, and keep persistent containers mounted (only swap the text inside).
+- A subtle random idle effect is welcome (the engine's shimmer) as long as it
+  is faint, infrequent and pauses on hover.
+- Everything must be responsive: the engine shrinks type to fit; check ~320px.
 
 ## Rules
 

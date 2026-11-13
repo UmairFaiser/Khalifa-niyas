@@ -22,6 +22,7 @@ import {
 } from "motion/react";
 import type { Transition } from "motion/react";
 import { Eraser, Play, Redo2, Square, Undo2 } from "lucide-react";
+import { useTheme } from "next-themes";
 import { motionTokens } from "../lib/motion-tokens";
 import styles from "./signature-pad.module.css";
 
@@ -458,6 +459,8 @@ export function SignaturePad({
 }: SignaturePadProps) {
   const uid = useId().replace(/[^a-zA-Z0-9-]/g, "");
   const reduced = useReducedFlag();
+  const { resolvedTheme } = useTheme();
+  const dark = resolvedTheme === "dark";
 
   const [history, setHistory] = useState<History>({
     past: [],
@@ -506,9 +509,22 @@ export function SignaturePad({
   // Width remains fixed. The width selector has been removed.
   const fixedWidth: InkWidth = defaultWidth;
 
+  // Black ink is invisible on the dark pad and white on the light one, so only
+  // the ink that reads on the current theme is offered.
+  const inks = (Object.keys(INK) as InkColor[]).filter((ink) =>
+    dark ? ink !== "black" : ink !== "white",
+  );
+
   useEffect(() => {
     onChangeRef.current?.(strokes);
   }, [strokes]);
+
+  // The default ink follows the theme, and flipping the theme re-homes an ink
+  // that would otherwise vanish (black in dark, white in light).
+  useEffect(() => {
+    if (dark && color === "black") setColor("white");
+    else if (!dark && color === "white") setColor("black");
+  }, [dark, color]);
 
   useEffect(
     () => () => cancelAnimationFrame(replayFrame.current),
@@ -1026,7 +1042,7 @@ export function SignaturePad({
         <div className={styles.group}>
           <Choice
             label="Ink color"
-            options={Object.keys(INK) as InkColor[]}
+            options={inks}
             value={color}
             onChange={(next) => {
               setColor(next);

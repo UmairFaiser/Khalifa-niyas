@@ -10,6 +10,7 @@ import {
   strokePath,
 } from "@/components/arc/signature-pad/signature-pad";
 import type { InkStroke } from "@/components/arc/signature-pad/signature-pad";
+import { inkFill } from "@/components/testimonial-signature";
 
 type Student = {
   id: string;
@@ -38,7 +39,7 @@ function AnimatedSignature({
   strokes: InkStroke[];
   signer: string;
 }) {
-  const [paths, setPaths] = useState<string[]>([]);
+  const [paths, setPaths] = useState<{ d: string; fill: string }[]>([]);
 
   useEffect(() => {
     if (!strokes.length) return;
@@ -69,8 +70,10 @@ function AnimatedSignature({
       setPaths(
         strokes.map((stroke, index) => {
           const localTime = elapsed - (offsets[index] ?? 0);
-          if (localTime < 0) return "";
-          return strokePath(stroke, localTime);
+          return {
+            d: localTime < 0 ? "" : strokePath(stroke, localTime),
+            fill: inkFill(stroke.color),
+          };
         }),
       );
 
@@ -95,7 +98,7 @@ function AnimatedSignature({
         className="block h-auto w-full"
       >
         {paths.map((path, index) => (
-          <path key={index} d={path} fill="var(--color-gray-1200)" />
+          <path key={index} d={path.d} fill={path.fill} />
         ))}
       </svg>
       <p className="mt-1 text-xs text-gray-1100">{signer}</p>
