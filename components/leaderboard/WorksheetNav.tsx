@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { SiteNav, type NavItem } from '@/components/site-nav';
 
 export default function WorksheetNav({
   sheets,
@@ -7,21 +7,19 @@ export default function WorksheetNav({
   sheets: { number: number; title: string | null }[];
   current: number | null;
 }) {
+  const items: NavItem[] = [
+    { href: '/worksheets', label: 'Overall', active: current === null },
+    ...sheets.map(s => ({
+      href: `/worksheets?worksheet=${s.number}`,
+      label: `Worksheet ${s.number}`,
+      title: s.title ?? undefined,
+      active: current === s.number,
+    })),
+  ];
+
   return (
-    <nav className="lbt-nav" aria-label="Leaderboard view">
-      <Link href="/worksheets" className={current === null ? 'active' : ''}>
-        Overall
-      </Link>
-      {sheets.map(s => (
-        <Link
-          key={s.number}
-          href={`/worksheets?worksheet=${s.number}`}
-          title={s.title ?? undefined}
-          className={current === s.number ? 'active' : ''}
-        >
-          Worksheet {s.number}
-        </Link>
-      ))}
-    </nav>
+    <div className="flex justify-center px-4 py-4">
+      <SiteNav items={items} ariaLabel="Leaderboard view" />
+    </div>
   );
 }

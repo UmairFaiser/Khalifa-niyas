@@ -29,32 +29,6 @@
   padding: 24px 16px 72px; /* bottom room for the 2nd/3rd offsets */
 }
 
-.lb-page .lbt-nav {
-  display: flex;
-  gap: 8px;
-  justify-content: safe center;
-  overflow-x: auto;
-  padding: 16px;
-  scrollbar-width: none;
-}
-.lb-page .lbt-nav a {
-  flex: none;
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 13px;
-  color: var(--color-gray-900);
-  text-decoration: none;
-  box-shadow: var(--shadow-custom);
-}
-.lb-page .lbt-nav a.active {
-  background: var(--color-gray-1200);
-  color: var(--color-gray-100);
-}
-.lb-page .lbt-nav a:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 2px;
-}
-
 .lb-page .lbt-wrap {
   max-width: 720px;
   margin: 0 auto;

@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 import { Grid, type Rows, type Row } from "@/lib/fast-grid";
 import { Skeleton } from "boneyard-js/react";
 import { toast } from "sonner";
+import { PillNav, type PillNavItem } from "@/components/site-nav";
 
 type StudentRow = {
   id: string;
@@ -242,43 +242,31 @@ export default function StudentsPage() {
         </div>
 
         <div
-          className="mb-4 flex flex-wrap items-center gap-2 animate-[fadeInUp_0.4s_cubic-bezier(0.2,0,0,1)_0.1s_both]"
+          className="mb-4 animate-[fadeInUp_0.4s_cubic-bezier(0.2,0,0,1)_0.1s_both]"
           style={{ animationFillMode: "both" }}
         >
-          {[
-            { value: "all", label: "All", prefix: "" },
-            ...INSTITUTE_OPTIONS,
-          ].map((opt, i) => {
-            const active = instituteFilter === opt.value;
-            const count = instituteCounts[opt.value] ?? 0;
-            return (
-              <button
-                key={opt.value}
-                onClick={() => setInstituteFilter(opt.value)}
-                className={`inline-flex items-center gap-2 h-9 px-3.5 rounded-lg text-sm font-medium transition-[transform,background-color,color] duration-150 active:scale-[0.96] whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
-                  active
-                    ? "bg-gray-1200 text-gray-background"
-                    : "bg-gray-100 text-gray-1200 hover:bg-gray-200"
-                }`}
-                style={{
-                  boxShadow: active
-                    ? "0 1px 2px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.06)"
-                    : "var(--shadow-border)",
-                }}
-              >
-                {opt.label}
-                <span
-                  className={`inline-flex items-center justify-center text-[11px] font-semibold tabular-nums rounded-full h-5 min-w-5.5 px-1.5 ${
-                    active
-                      ? "bg-gray-background/18 text-gray-background"
-                      : "bg-gray-200 text-gray-1100"
-                  }`}
-                >
-                  {count.toLocaleString()}
-                </span>
-              </button>
-            );
-          })}
+          <PillNav
+            ariaLabel="Institute filter"
+            items={[
+              { value: "all", label: "All" },
+              ...INSTITUTE_OPTIONS,
+            ].map((opt) => {
+              const count = instituteCounts[opt.value] ?? 0;
+              return {
+                id: opt.value,
+                label: (
+                  <>
+                    {opt.label}
+                    <span className="pill-nav-count">
+                      {count.toLocaleString()}
+                    </span>
+                  </>
+                ),
+                active: instituteFilter === opt.value,
+                onClick: () => setInstituteFilter(opt.value),
+              } satisfies PillNavItem;
+            })}
+          />
         </div>
 
         <div

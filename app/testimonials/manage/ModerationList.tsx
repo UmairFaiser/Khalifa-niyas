@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
+import { PillNav, type PillNavItem } from "@/components/site-nav";
 import { TestimonialSignature } from "@/components/testimonial-signature";
 import { setTestimonialStatus, type TestimonialStatus } from "../actions";
 
@@ -75,6 +76,18 @@ export default function ModerationList({
   const shown =
     filter === "all" ? items : items.filter((item) => item.status === filter);
 
+  const filterItems: PillNavItem[] = FILTERS.map((option) => ({
+    id: option.key,
+    label: (
+      <>
+        {option.label}
+        <span className="pill-nav-count">{counts[option.key]}</span>
+      </>
+    ),
+    active: option.key === filter,
+    onClick: () => setFilter(option.key),
+  }));
+
   function change(id: string, status: TestimonialStatus) {
     setBusyId(id);
 
@@ -89,38 +102,8 @@ export default function ModerationList({
 
   return (
     <div>
-      <div
-        className="mt-6 flex flex-wrap gap-1.5 rounded-2xl p-1"
-        style={{
-          backgroundColor: "var(--color-gray-100)",
-          boxShadow: "inset var(--shadow-border)",
-        }}
-      >
-        {FILTERS.map((option) => {
-          const active = option.key === filter;
-
-          return (
-            <button
-              key={option.key}
-              type="button"
-              onClick={() => setFilter(option.key)}
-              aria-pressed={active}
-              className={`inline-flex h-9 items-center gap-2 rounded-xl px-3.5 text-sm font-semibold transition-[transform,background-color,color] duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus-ring ${
-                active
-                  ? "text-gray-background"
-                  : "text-gray-1100 hover:text-gray-1200"
-              }`}
-              style={{
-                backgroundColor: active ? "var(--color-gray-1200)" : "transparent",
-              }}
-            >
-              {option.label}
-              <span className={active ? "opacity-70" : "text-gray-1000"}>
-                {counts[option.key]}
-              </span>
-            </button>
-          );
-        })}
+      <div className="mt-6">
+        <PillNav items={filterItems} ariaLabel="Testimonial status filter" />
       </div>
 
       {shown.length === 0 ? (

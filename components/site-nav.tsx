@@ -2,102 +2,193 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  createElement,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  type ReactNode,
+} from "react";
 
-export function SiteNav() {
-  const pathname = usePathname() ?? "/";
-
-  return (
-    <header className="relative z-10 px-4 pt-5 pb-1 sm:pb-0">
-      <nav className="max-w-6xl mx-auto flex items-center justify-between">
-        <Link
-          href="/"
-          className="group flex items-center gap-2.5 -ml-1 px-1 py-1.5 rounded-xl hover:bg-gray-100/60 transition-colors"
-        >
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-            style={{
-              backgroundColor: "var(--color-gray-1200)",
-              color: "white",
-              boxShadow:
-                "0 1px 2px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.08)",
-            }}
-          >
-            <svg
-              style={{ width: "18px", height: "18px" }}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2.3}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-              <path d="M6 12v5c3 3 9 3 12 0v-5" />
-            </svg>
-          </div>
-          <div className="leading-tight min-w-0">
-            <p className="text-[13px] sm:text-sm font-semibold text-gray-1200 truncate">
-              ICT with Khalifa Niyas
-            </p>
-            <p className="text-[11px] sm:text-xs text-gray-1000 truncate">
-              Student Worksheet Tracking
-            </p>
-          </div>
-        </Link>
-
-        <div
-          className="flex items-center gap-1.5 p-1 rounded-2xl"
-          style={{
-            backgroundColor: "var(--color-gray-100)",
-            opacity: 0.92,
-            boxShadow: "inset var(--shadow-border)",
-          }}
-        >
-          <NavChip href="/" exact active={pathname === "/"}>
-            Register
-          </NavChip>
-          <NavChip href="/students" exact active={pathname === "/students"}>
-            Students
-          </NavChip>
-          <NavChip href="/details" exact active={pathname === "/details"}>
-            Details
-          </NavChip>
-          <NavChip href="/details" exact active={pathname === "/details"}>
-            Details
-          </NavChip>
-        </div>
-      </nav>
-    </header>
-  );
-}
-
-function NavChip({
-  href,
-  exact,
-  active,
-  children,
-}: {
+export type NavItem = {
   href: string;
-  exact: boolean;
-  active: boolean;
-  children: React.ReactNode;
+  label: string;
+  title?: string;
+  active?: boolean;
+};
+
+export type PillNavItem = {
+  id: string;
+  label: ReactNode;
+  active?: boolean;
+  onClick?: () => void;
+  href?: string;
+  title?: string;
+};
+
+const useIsoLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
+/**
+ * The prototype picker pill: a dark, blurred capsule with a highlight that
+ * slides behind the active item. Renders links (when `href` is set) or buttons.
+ */
+export function PillNav({
+  items,
+  ariaLabel = "Primary",
+}: {
+  items: PillNavItem[];
+  ariaLabel?: string;
 }) {
+  const pathname = usePathname() ?? "/";
+  const nav = useRef<HTMLElement>(null);
+  const highlight = useRef<HTMLSpanElement>(null);
+
+  const isActive = (item: PillNavItem) =>
+    item.active ?? (item.href ? pathname === item.href : false);
+  const activeIndex = Math.max(items.findIndex(isActive), 0);
+
+  useIsoLayoutEffect(() => {
+    function move() {
+      const el = nav.current?.querySelectorAll<HTMLElement>(
+      ".pill-nav-item",
+      )[activeIndex];
+      const hl = highlight.current;
+      if (!el || !hl) return;
+      hl.style.width = `${el.offsetWidth}px`;
+      hl.style.transform = `translateX(${el.offsetLeft}px)`;
+    }
+    move();
+    window.addEventListener("resize", move);
+    document.fonts?.ready.then(move).catch(() => {});
+    return () => window.removeEventListener("resize", move);
+  }, [activeIndex]);
+
+  useEffect(() => {
+    let second = 0;
+    const first = requestAnimationFrame(() => {
+      second = requestAnimationFrame(() =>
+        nav.current?.setAttribute("data-ready", ""),
+      );
+    });
+    return () => {
+      cancelAnimationFrame(first);
+      cancelAnimationFrame(second);
+    };
+  }, []);
+
   return (
-    <Link
-      href={href}
-      className={`relative inline-flex items-center h-9 px-3.5 rounded-xl text-sm font-semibold duration-150 active:scale-[0.96] transition-transform ${
-        active
-          ? "text-gray-background"
-          : "text-gray-1100 hover:text-gray-1200"
-      }`}
-      style={{
-        backgroundColor: active ? "var(--color-gray-1200)" : "transparent",
-        boxShadow: active
-          ? "0 1px 2px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.08)"
-          : undefined,
-      }}
-    >
-      {children}
-    </Link>
+    <>
+      <style>{CSS}</style>
+      <nav ref={nav} className="pill-nav" aria-label={ariaLabel}>
+        <span ref={highlight} className="pill-nav-highlight" aria-hidden="true" />
+        {items.map((item) => {
+          const active = isActive(item);
+          const common = {
+            key: item.id,
+            title: item.title,
+            className: "pill-nav-item",
+            "data-active": active ? "" : undefined,
+            "aria-current": active ? "page" : undefined,
+          };
+          if (item.href) {
+            return createElement(Link, { ...common, href: item.href }, item.label);
+          }
+          return createElement(
+            "button",
+            { ...common, type: "button", onClick: item.onClick },
+            item.label,
+          );
+        })}
+      </nav>
+    </>
   );
 }
+
+export function SiteNav({
+  items,
+  ariaLabel = "Primary",
+}: {
+  items: NavItem[];
+  ariaLabel?: string;
+}) {
+  const pillItems: PillNavItem[] = items.map((item) => ({
+    id: `${item.href}-${item.label}`,
+    label: item.label,
+    href: item.href,
+    title: item.title,
+    active: item.active,
+  }));
+  return <PillNav items={pillItems} ariaLabel={ariaLabel} />;
+}
+
+const CSS = `
+.pill-nav {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(10, 10, 10, 0.82);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.4);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+    0 8px 24px rgba(0, 0, 0, 0.24),
+    0 2px 6px rgba(0, 0, 0, 0.12);
+  font-size: 13px;
+  line-height: 1;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.pill-nav::-webkit-scrollbar { display: none; }
+.pill-nav-highlight {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  will-change: transform;
+}
+.pill-nav[data-ready] .pill-nav-highlight {
+  transition:
+    transform 250ms cubic-bezier(0.23, 1, 0.32, 1),
+    width 250ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pill-nav[data-ready] .pill-nav-highlight { transition: none; }
+}
+.pill-nav-item {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  font: inherit;
+  transition: color 150ms ease-out;
+}
+.pill-nav-item:hover { color: rgba(255, 255, 255, 0.85); }
+.pill-nav-item:active { transform: scale(0.97); }
+.pill-nav-item:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.4); outline-offset: 2px; }
+.pill-nav-item[data-active] { color: #fff; }
+.pill-nav-item .pill-nav-count {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.6;
+}
+.pill-nav-item[data-active] .pill-nav-count { opacity: 0.75; }
+`;

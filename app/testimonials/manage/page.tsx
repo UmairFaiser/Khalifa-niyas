@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
@@ -69,22 +68,13 @@ export default async function ManageTestimonialsPage() {
   return (
     <main className="min-h-screen px-4 py-8 sm:py-10">
       <div className="mx-auto w-full max-w-4xl">
-        <header className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-medium tracking-tight text-gray-1200 sm:text-3xl">
-              Review testimonials
-            </h1>
-            <p className="mt-1.5 text-sm leading-6 text-text-paragraph">
-              Approve a testimonial to publish it on the public page.
-            </p>
-          </div>
-
-          <Link
-            href="/testimonials"
-            className="inline-flex h-9 items-center rounded-full border border-gray-400 px-4 text-sm font-medium text-gray-1200 transition-colors hover:bg-gray-200"
-          >
-            View public page
-          </Link>
+        <header>
+          <h1 className="text-2xl font-medium tracking-tight text-gray-1200 sm:text-3xl">
+            Review testimonials
+          </h1>
+          <p className="mt-1.5 text-sm leading-6 text-text-paragraph">
+            Approve a testimonial to publish it on the public page.
+          </p>
         </header>
 
         {error ? (
